@@ -9,7 +9,7 @@ use Sircamp\Xenapi\Element\XenVirtualMachine;
 class Xen
 {
 
-	private $xenconnection = null;
+	private $xenConnection = null;
 
 	/**
 	 * Xen constructor.
@@ -34,10 +34,10 @@ class Xen
 			throw new \InvalidArgumentException("'password' value mast be an non empty string", 1);
 		}
 
-		$this->xenconnection = new XenConnection();
+		$this->xenConnection = new XenConnection();
 		try
 		{
-			$this->xenconnection->_setServer($url, $user, $password);
+			$this->xenConnection->_setServer($url, $user, $password);
 		}
 		catch (\Exception $e)
 		{
@@ -54,9 +54,9 @@ class Xen
 	 */
 	public function getVMByNameLabel($name): XenVirtualMachine
 	{
-		$refID = $this->xenconnection->__call('VM__get_by_name_label', [$name])->getValue();
+		$refID = $this->xenConnection->__call('VM__get_by_name_label', [$name])->getValue();
 
-		return new XenVirtualMachine($this->xenconnection, $refID);
+		return new XenVirtualMachine($this->xenConnection, $refID);
 	}
 
 	/**
@@ -68,9 +68,9 @@ class Xen
 	 */
 	public function getHostByNameLabel($name): XenHost
 	{
-		$response = new XenResponse($this->xenconnection->host__get_by_name_label($name));
+		$response = new XenResponse($this->xenConnection->host__get_by_name_label($name));
 
-		return new XenHost($this->xenconnection, $name, $response->getValue()[0]);
+		return new XenHost($this->xenConnection, $name, $response->getValue()[0]);
 	}
 
 	/**
@@ -80,11 +80,11 @@ class Xen
 	 */
 	public function getAllVMs(): array
 	{
-		$refIDs = $this->xenconnection->__call('VM__get_all')->getValue();
+		$refIDs = $this->xenConnection->__call('VM__get_all')->getValue();
 		$vms    = array();
 		foreach ($refIDs as $refID)
 		{
-			$vms[] = new XenVirtualMachine($this->xenconnection, $refID);
+			$vms[] = new XenVirtualMachine($this->xenConnection, $refID);
 		}
 
 		return $vms;
@@ -99,9 +99,9 @@ class Xen
 	 */
 	public function getVMByUUID($uuid)
 	{
-		$refID = $this->xenconnection->__call('VM__get_by_uuid', [$uuid])->getValue();
+		$refID = $this->xenConnection->__call('VM__get_by_uuid', [$uuid])->getValue();
 
-		return new XenVirtualMachine($this->xenconnection, $refID);
+		return new XenVirtualMachine($this->xenConnection, $refID);
 	}
 }
 
