@@ -134,7 +134,6 @@ class XenConnection
 	 * @param String $user
 	 * @param String $password
 	 *
-	 * @return XenResponse
 	 * @throws XenConnectionException
 	 */
 
@@ -163,7 +162,7 @@ class XenConnection
 	 * @return String
 	 */
 
-	function xenRPC_method(String $name, Array $params)
+	function xenRPC_method(String $name, array $params)
 	{
 
 		$encoded_request = xmlrpc_encode_request($name, $params);
@@ -178,7 +177,7 @@ class XenConnection
 	 * @param String $url
 	 * @param String $request
 	 *
-	 * @return XenResponse
+	 * @return mixed
 	 */
 
 	function xenRPC_request(String $url, String $request)
@@ -194,20 +193,13 @@ class XenConnection
 					'Content-length' => strlen($request),
 				],
 				'body'    => $request,
-				'timeout' => 60,
+				'timeout' => 120,
 				'verify'  => false,
 
 			]);
 
 		$body = $response->getBody();
-		$xml  = "";
-
-		while (!$body->eof())
-		{
-			$xml .= $body->read(1024);
-		}
-
-		return xmlrpc_decode($xml);
+		return xmlrpc_decode((string) $body);
 	}
 
 
@@ -220,7 +212,7 @@ class XenConnection
 	 * @return XenResponse
 	 */
 
-	function xenRPC_parse_response(Array $response): XenResponse
+	function xenRPC_parse_response(array $response): XenResponse
 	{
 
 
@@ -277,7 +269,7 @@ class XenConnection
 	 * @return XenResponse
 	 */
 
-	function __call(String $name, Array $args = array()): XenResponse
+	function __call(String $name, array $args = array()): XenResponse
 	{
 		if (!Validator::arrayType()->validate($args))
 		{
