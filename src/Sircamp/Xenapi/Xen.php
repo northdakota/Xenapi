@@ -1,25 +1,28 @@
 <?php namespace Sircamp\Xenapi;
 
-use Respect\Validation\Validator as Validator;
-use Sircamp\Xenapi\Connection\XenConnection as XenConnection;
-use Sircamp\Xenapi\Connection\XenResponse as XenResponse;
-use Sircamp\Xenapi\Element\XenHost as XenHost;
-use Sircamp\Xenapi\Element\XenVirtualMachine as XenVirtualMachine;
+use Respect\Validation\Validator;
+use Sircamp\Xenapi\Connection\XenConnection;
+use Sircamp\Xenapi\Connection\XenResponse;
+use Sircamp\Xenapi\Element\XenHost;
+use Sircamp\Xenapi\Element\XenVirtualMachine;
 
 class Xen
 {
 
 	private $xenconnection = null;
 
+	/**
+	 * Xen constructor.
+	 *
+	 * @param $url
+	 * @param $user
+	 * @param $password
+	 */
 	public function __construct($url, $user, $password)
 	{
-
-
 		if (!Validator::ip()->validate($url))
 		{
-
 			throw new \InvalidArgumentException("'url' value mast be an ipv4 address", 1);
-
 		}
 		if (!Validator::stringType()->validate($user))
 		{
@@ -51,9 +54,9 @@ class Xen
 	 */
 	public function getVMByNameLabel($name): XenVirtualMachine
 	{
-		$response = new XenResponse($this->xenconnection->VM__get_by_name_label($name));
+		$refID = $this->xenconnection->__call('VM__get_by_name_label', [$name])->getValue();
 
-		return new XenVirtualMachine($this->xenconnection, $name, $response->getValue()[0]);
+		return new XenVirtualMachine($this->xenconnection, $refID);
 	}
 
 	/**
@@ -63,14 +66,43 @@ class Xen
 	 *
 	 * @return mixed
 	 */
-	public function getHOSTByNameLabel($name)
+	public function getHostByNameLabel($name): XenHost
 	{
 		$response = new XenResponse($this->xenconnection->host__get_by_name_label($name));
 
 		return new XenHost($this->xenconnection, $name, $response->getValue()[0]);
 	}
 
+	/**
+	 * Get all VMs from the XenServer
+	 *
+	 * @return array
+	 */
+	public function getAllVMs(): array
+	{
+		$refIDs = $this->xenconnection->__call('VM__get_all')->getValue();
+		$vms    = array();
+		foreach ($refIDs as $refID)
+		{
+			$vms[] = new XenVirtualMachine($this->xenconnection, $refID);
+		}
 
+		return $vms;
+	}
+
+	/**
+	 * Get a VM by its UUID
+	 *
+	 * @param $uuid
+	 *
+	 * @return XenVirtualMachine
+	 */
+	public function getVMByUUID($uuid)
+	{
+		$refID = $this->xenconnection->__call('VM__get_by_uuid', [$uuid])->getValue();
+
+		return new XenVirtualMachine($this->xenconnection, $refID);
+	}
 }
 
 ?>

@@ -1,17 +1,14 @@
 <?php namespace Sircamp\Xenapi\Element;
 
-use Respect\Validation\Validator as Validator;
-use GuzzleHttp\Client as Client;
-
 class XenHost extends XenElement
 {
 
 	private $name;
 	private $hostId;
 
-	public function __construct($xenconnection, $name, $hostId)
+	public function __construct($xenConnection, $name, $hostId)
 	{
-		parent::__construct($xenconnection);
+		parent::__construct($xenConnection);
 		$this->name   = $name;
 		$this->hostId = $hostId;
 	}
@@ -75,7 +72,7 @@ class XenHost extends XenElement
 	public function disable()
 	{
 
-		return $this->getXenconnection()->host__disable($this->getHostId());
+		return $this->getXenConnection()->host__disable($this->getHostId());
 	}
 
 	/**
@@ -88,7 +85,7 @@ class XenHost extends XenElement
 	public function enable()
 	{
 
-		return $this->getXenconnection()->host__enable($this->getHostId());
+		return $this->getXenConnection()->host__enable($this->getHostId());
 	}
 
 
@@ -103,7 +100,7 @@ class XenHost extends XenElement
 	public function shutdown()
 	{
 
-		return $this->getXenconnection()->host__shutdown($this->getHostId());
+		return $this->getXenConnection()->host__shutdown($this->getHostId());
 	}
 
 	/**
@@ -117,7 +114,7 @@ class XenHost extends XenElement
 	public function reboot()
 	{
 
-		return $this->getXenconnection()->host__reboot($this->getHostId());
+		return $this->getXenConnection()->host__reboot($this->getHostId());
 	}
 
 
@@ -131,7 +128,7 @@ class XenHost extends XenElement
 	public function dmesg()
 	{
 
-		return $this->getXenconnection()->host__dmesg($this->getHostId());
+		return $this->getXenConnection()->host__dmesg($this->getHostId());
 	}
 
 	/**
@@ -144,7 +141,7 @@ class XenHost extends XenElement
 	public function dmesgClear()
 	{
 
-		return $this->getXenconnection()->host__dmesg_clear($this->getHostId());
+		return $this->getXenConnection()->host__dmesg_clear($this->getHostId());
 	}
 
 	/**
@@ -157,7 +154,7 @@ class XenHost extends XenElement
 	public function getLog()
 	{
 
-		return $this->getXenconnection()->host__get_log($this->getHostId());
+		return $this->getXenConnection()->host__get_log($this->getHostId());
 	}
 
 	/**
@@ -170,7 +167,7 @@ class XenHost extends XenElement
 	public function listMethods()
 	{
 
-		return $this->getXenconnection()->host__list_methods();
+		return $this->getXenConnection()->host__list_methods();
 	}
 
 
@@ -184,7 +181,7 @@ class XenHost extends XenElement
 	public function licenseApply($license = "")
 	{
 
-		return $this->getXenconnection()->host__license_apply($this->getHostId(), $license);
+		return $this->getXenConnection()->host__license_apply($this->getHostId(), $license);
 	}
 
 
@@ -198,7 +195,7 @@ class XenHost extends XenElement
 	public function assertCanEvacuate()
 	{
 
-		return $this->getXenconnection()->host__assert_can_evacuate($this->getHostId());
+		return $this->getXenConnection()->host__assert_can_evacuate($this->getHostId());
 	}
 
 	/**
@@ -211,7 +208,7 @@ class XenHost extends XenElement
 	public function evacuate()
 	{
 
-		return $this->getXenconnection()->host__evacuate($this->getHostId());
+		return $this->getXenConnection()->host__evacuate($this->getHostId());
 	}
 
 
@@ -225,7 +222,7 @@ class XenHost extends XenElement
 	public function getServertime()
 	{
 
-		return $this->getXenconnection()->host__get_servertime($this->getHostId());
+		return $this->getXenConnection()->host__get_servertime($this->getHostId());
 	}
 
 	/**
@@ -238,7 +235,7 @@ class XenHost extends XenElement
 	public function getServerLocaltime()
 	{
 
-		return $this->getXenconnection()->host__get_server_localtime($this->getHostId());
+		return $this->getXenConnection()->host__get_server_localtime($this->getHostId());
 	}
 
 	/**
@@ -251,7 +248,7 @@ class XenHost extends XenElement
 	public function getServerCertificate()
 	{
 
-		return $this->getXenconnection()->host__get_server_certificate($this->getHostId());
+		return $this->getXenConnection()->host__get_server_certificate($this->getHostId());
 	}
 
 
@@ -267,7 +264,7 @@ class XenHost extends XenElement
 	public function applyEdition($edition, $force = false)
 	{
 
-		return $this->getXenconnection()->host__apply_edition($this->getHostId(), $edition, $force);
+		return $this->getXenConnection()->host__apply_edition($this->getHostId(), $edition, $force);
 	}
 
 
@@ -281,7 +278,7 @@ class XenHost extends XenElement
 	public function refreshPackInfo()
 	{
 
-		return $this->getXenconnection()->host__refresh_pack_info($this->getHostId());
+		return $this->getXenConnection()->host__refresh_pack_info($this->getHostId());
 	}
 
 
@@ -295,7 +292,7 @@ class XenHost extends XenElement
 	public function enableLocalStorageCaching($srRef)
 	{
 
-		return $this->getXenconnection()->host__enable_local_storage_caching($this->getHostId(), $srRef);
+		return $this->getXenConnection()->host__enable_local_storage_caching($this->getHostId(), $srRef);
 	}
 
 
@@ -309,7 +306,7 @@ class XenHost extends XenElement
 	public function disableLocalStorageCaching()
 	{
 
-		return $this->getXenconnection()->host__disable_local_storage_caching($this->getHostId());
+		return $this->getXenConnection()->host__disable_local_storage_caching($this->getHostId());
 	}
 
 	/**
@@ -322,7 +319,7 @@ class XenHost extends XenElement
 	public function migrateReceive($networkRef, $features = array())
 	{
 
-		return $this->getXenconnection()->host__migrate_receive($this->getHostId(), $networkRef, $features);
+		return $this->getXenConnection()->host__migrate_receive($this->getHostId(), $networkRef, $features);
 	}
 
 	/**
@@ -334,7 +331,7 @@ class XenHost extends XenElement
 	 */
 	public function getUUID()
 	{
-		return $this->getXenconnection()->host__get_uuid($this->getHostId());
+		return $this->getXenConnection()->host__get_uuid($this->getHostId());
 	}
 
 	/**
@@ -346,7 +343,7 @@ class XenHost extends XenElement
 	 */
 	public function getNameLabel()
 	{
-		return $this->getXenconnection()->host__get_name_label($this->getHostId());
+		return $this->getXenConnection()->host__get_name_label($this->getHostId());
 	}
 
 	/**
@@ -358,7 +355,7 @@ class XenHost extends XenElement
 	 */
 	public function setNameLabel($name)
 	{
-		return $this->getXenconnection()->host__set_name_label($this->getHostId(), $name);
+		return $this->getXenConnection()->host__set_name_label($this->getHostId(), $name);
 	}
 
 	/**
@@ -370,7 +367,7 @@ class XenHost extends XenElement
 	 */
 	public function getNameDescription()
 	{
-		return $this->getXenconnection()->host__get_name_description($this->getHostId());
+		return $this->getXenConnection()->host__get_name_description($this->getHostId());
 	}
 
 	/**
@@ -382,7 +379,7 @@ class XenHost extends XenElement
 	 */
 	public function setNameDescription($name)
 	{
-		return $this->getXenconnection()->host__set_name_description($this->getHostId(), $name);
+		return $this->getXenConnection()->host__set_name_description($this->getHostId(), $name);
 	}
 
 	/**
@@ -394,7 +391,7 @@ class XenHost extends XenElement
 	 */
 	public function getCurrentOperations()
 	{
-		return $this->getXenconnection()->host__get_current_operations($this->getHostId());
+		return $this->getXenConnection()->host__get_current_operations($this->getHostId());
 	}
 
 	/**
@@ -406,7 +403,7 @@ class XenHost extends XenElement
 	 */
 	public function getAllowedOperations()
 	{
-		return $this->getXenconnection()->host__get_allowed_operations($this->getHostId());
+		return $this->getXenConnection()->host__get_allowed_operations($this->getHostId());
 	}
 
 	/**
@@ -418,7 +415,7 @@ class XenHost extends XenElement
 	 */
 	public function getSoftwareVersion()
 	{
-		return $this->getXenconnection()->host__get_software_version($this->getHostId());
+		return $this->getXenConnection()->host__get_software_version($this->getHostId());
 	}
 
 	/**
@@ -430,7 +427,7 @@ class XenHost extends XenElement
 	 */
 	public function getOtherConfig()
 	{
-		return $this->getXenconnection()->host__get_other_config($this->getHostId());
+		return $this->getXenConnection()->host__get_other_config($this->getHostId());
 	}
 
 	/**
@@ -442,7 +439,7 @@ class XenHost extends XenElement
 	 */
 	public function setOtherConfig($array = array())
 	{
-		return $this->getXenconnection()->host__set_other_config($this->getHostId(), $array);
+		return $this->getXenConnection()->host__set_other_config($this->getHostId(), $array);
 	}
 
 	/**
@@ -454,7 +451,7 @@ class XenHost extends XenElement
 	 */
 	public function addToOtherConfig($key, $value)
 	{
-		return $this->getXenconnection()->host__add_to_other_config($this->getHostId(), $key, $value);
+		return $this->getXenConnection()->host__add_to_other_config($this->getHostId(), $key, $value);
 	}
 
 	/**
@@ -467,7 +464,7 @@ class XenHost extends XenElement
 	 */
 	public function removeFromOtherConfig($key)
 	{
-		return $this->getXenconnection()->host__remove_from_other_config($this->getHostId(), $key);
+		return $this->getXenConnection()->host__remove_from_other_config($this->getHostId(), $key);
 	}
 
 	/**
@@ -479,7 +476,7 @@ class XenHost extends XenElement
 	 */
 	public function getSupportedBootloaders()
 	{
-		return $this->getXenconnection()->host__get_supported_bootloaders($this->getHostId());
+		return $this->getXenConnection()->host__get_supported_bootloaders($this->getHostId());
 	}
 
 	/**
@@ -491,15 +488,15 @@ class XenHost extends XenElement
 	 */
 	public function getResidentVMs()
 	{
-		$response = $this->getXenconnection()->host__get_resident_VMs($this->getHostId());
+		$response = $this->getXenConnection()->host__get_resident_VMs($this->getHostId());
 		$VMs      = array();
 		if ($response->getValue() != "")
 		{
 			foreach ($response->getValue() as $key => $vm)
 			{
-				$xenVM = new XenVirtualMachine($this->getXenconnection(), null, $vm);
+				$xenVM = new XenVirtualMachine($this->getXenConnection(), null, $vm);
 				$name  = $xenVM->getNameLabel()->getValue();
-				array_push($VMs, new XenVirtualMachine($this->getXenconnection(), $name, $vm));
+				array_push($VMs, new XenVirtualMachine($this->getXenConnection(), $name, $vm));
 			}
 			$response->_setValue($VMs);
 		}
@@ -516,7 +513,7 @@ class XenHost extends XenElement
 	 */
 	public function getPatches()
 	{
-		return $this->getXenconnection()->host__get_patches($this->getHostId());
+		return $this->getXenConnection()->host__get_patches($this->getHostId());
 	}
 
 	/**
@@ -528,7 +525,7 @@ class XenHost extends XenElement
 	 */
 	public function getHostCPUs()
 	{
-		return $this->getXenconnection()->host__get_host_CPUs($this->getHostId());
+		return $this->getXenConnection()->host__get_host_CPUs($this->getHostId());
 	}
 
 
@@ -541,7 +538,7 @@ class XenHost extends XenElement
 	 */
 	public function getCPUInfo()
 	{
-		return $this->getXenconnection()->host__get_cpu_info($this->getHostId());
+		return $this->getXenConnection()->host__get_cpu_info($this->getHostId());
 	}
 
 	/**
@@ -553,7 +550,7 @@ class XenHost extends XenElement
 	 */
 	public function getHostname()
 	{
-		return $this->getXenconnection()->host__get_hostname($this->getHostId());
+		return $this->getXenConnection()->host__get_hostname($this->getHostId());
 	}
 
 	/**
@@ -565,7 +562,7 @@ class XenHost extends XenElement
 	 */
 	public function setHostname($name)
 	{
-		return $this->getXenconnection()->host__set_hostname($this->getHostId(), $name);
+		return $this->getXenConnection()->host__set_hostname($this->getHostId(), $name);
 	}
 
 	/**
@@ -577,7 +574,7 @@ class XenHost extends XenElement
 	 */
 	public function getAddress()
 	{
-		return $this->getXenconnection()->host__get_address($this->getHostId());
+		return $this->getXenConnection()->host__get_address($this->getHostId());
 	}
 
 	/**
@@ -589,7 +586,7 @@ class XenHost extends XenElement
 	 */
 	public function setAddress($address)
 	{
-		return $this->getXenconnection()->host__set_address($this->getHostId(), $address);
+		return $this->getXenConnection()->host__set_address($this->getHostId(), $address);
 	}
 
 	/**
@@ -601,7 +598,7 @@ class XenHost extends XenElement
 	 */
 	public function getMetrics()
 	{
-		return $this->getXenconnection()->host__get_metrics($this->getHostId());
+		return $this->getXenConnection()->host__get_metrics($this->getHostId());
 	}
 
 	/**
@@ -613,7 +610,7 @@ class XenHost extends XenElement
 	 */
 	public function getLicenseParam()
 	{
-		return $this->getXenconnection()->host__get_license_params($this->getHostId());
+		return $this->getXenConnection()->host__get_license_params($this->getHostId());
 	}
 
 	/**
@@ -625,7 +622,7 @@ class XenHost extends XenElement
 	 */
 	public function getEdition()
 	{
-		return $this->getXenconnection()->host__get_edition($this->getHostId());
+		return $this->getXenConnection()->host__get_edition($this->getHostId());
 	}
 
 	/**
@@ -637,7 +634,7 @@ class XenHost extends XenElement
 	 */
 	public function getLicenseServer()
 	{
-		return $this->getXenconnection()->host__get_license_server($this->getHostId());
+		return $this->getXenConnection()->host__get_license_server($this->getHostId());
 	}
 
 	/**
@@ -649,7 +646,7 @@ class XenHost extends XenElement
 	 */
 	public function setLicenseServer($license_server)
 	{
-		return $this->getXenconnection()->host__license_server($this->getHostId(), $license_server);
+		return $this->getXenConnection()->host__license_server($this->getHostId(), $license_server);
 	}
 
 	/**
@@ -661,7 +658,7 @@ class XenHost extends XenElement
 	 */
 	public function addToLicenseServer($key, $value)
 	{
-		return $this->getXenconnection()->host__add_to_license_server($this->getHostId(), $key, $value);
+		return $this->getXenConnection()->host__add_to_license_server($this->getHostId(), $key, $value);
 	}
 
 	/**
@@ -674,7 +671,7 @@ class XenHost extends XenElement
 	 */
 	public function removeFromLicenseServer($key)
 	{
-		return $this->getXenconnection()->host__remove_from_license_server($this->getHostId(), $key);
+		return $this->getXenConnection()->host__remove_from_license_server($this->getHostId(), $key);
 	}
 
 	/**
@@ -686,7 +683,7 @@ class XenHost extends XenElement
 	 */
 	public function getChipsetInfo()
 	{
-		return $this->getXenconnection()->host__get_chipset_info($this->getHostId());
+		return $this->getXenConnection()->host__get_chipset_info($this->getHostId());
 	}
 }
 

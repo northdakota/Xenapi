@@ -1,7 +1,7 @@
 <?php namespace Sircamp\Xenapi\Connection;
 
-use Respect\Validation\Validator as Validator;
 use GuzzleHttp\Client as Client;
+use Respect\Validation\Validator as Validator;
 use Sircamp\Xenapi\Exception\XenConnectionException as XenConnectionException;
 
 class XenConnection
@@ -122,10 +122,13 @@ class XenConnection
 	/**
 	 * Sets all values of object.
 	 *
+	 * @param       $url
+	 * @param       $session_id
+	 * @param       $user
 	 * @param mixed $password the password, mixed $url the url,
 	 *                        mixed $session_id the session_id and mixed 4user the user
 	 *
-	 * @return self
+	 * @return XenConnection
 	 */
 
 	function _setAll($url, $session_id, $user, $password)
@@ -145,13 +148,17 @@ class XenConnection
 	 * @param mixed $url the ip, mixed $user the user and mixed $password the password,
 	 *
 	 *
+	 * @param       $user
+	 * @param       $password
+	 *
 	 * @return XenResponse
+	 * @throws XenConnectionException
 	 */
 
 	function _setServer($url, $user, $password)
 	{
-
-		$response = $this->xenrpc_request($url, $this->xenrpc_method('session.login_with_password', array($user, $password, '1.3.1')));
+		$rpc_method = $this->xenrpc_method('session.login_with_password', array($user, $password));
+		$response   = $this->xenrpc_request($url, $rpc_method);
 
 		if (Validator::arrayType()->validate($response) && Validator::key('Status', Validator::equals('Success'))->validate($response))
 		{
@@ -176,7 +183,7 @@ class XenConnection
 	 * @return XenResponse
 	 */
 
-	function xenrpc_parseresponse($response)
+	function xenrpc_parseresponse($response): XenResponse
 	{
 
 
@@ -199,7 +206,7 @@ class XenConnection
 				{
 
 					$response = $this->xenrpc_request($this->url, $this->xenrpc_method('session.login_with_password',
-						array($this->user, $this->password, '1.3.1')));
+						array($this->user, $this->password)));
 
 					if (Validator::arrayType()->validate($response) && Validator::key('Status', Validator::equals('Success'))->validate($response))
 					{
@@ -212,6 +219,7 @@ class XenConnection
 				}
 				else
 				{
+					//TODO: add error handling
 					return new XenResponse($response);
 
 				}
@@ -242,15 +250,18 @@ class XenConnection
 
 
 	/**
-	 * This make the curl request for comunicate to xen
+	 * This make the curl request for communication with xen
 	 *
-	 * @param mixed $usr the url and mixed $req the request,
-	 *
+	 * @param $url
+	 * @param $request
 	 *
 	 * @return XenResponse
+	 * @internal param mixed $usr the url and mixed $req the request,
+	 *
+	 *
 	 */
 
-	function xenrpc_request($url, $req)
+	function xenrpc_request($url, $request)
 	{
 
 		$client = new Client();
@@ -260,9 +271,9 @@ class XenConnection
 
 				'headers' => [
 					'Content-type'   => 'text/xml',
-					'Content-length' => strlen($req),
+					'Content-length' => strlen($request),
 				],
-				'body'    => $req,
+				'body'    => $request,
 				'timeout' => 60,
 				'verify'  => false,
 
@@ -270,11 +281,11 @@ class XenConnection
 
 		$body = $response->getBody();
 		$xml  = "";
+
 		while (!$body->eof())
 		{
 			$xml .= $body->read(1024);
 		}
-
 
 		return xmlrpc_decode($xml);
 	}
@@ -286,22 +297,25 @@ class XenConnection
 	 * @param mixed $name the name of method and $args the argument of method,
 	 *
 	 *
+	 * @param array $args
+	 *
 	 * @return XenResponse
 	 */
 
-	function __call($name, $args)
+	function __call($name, $args = array()): XenResponse
 	{
-
 		if (!Validator::arrayType()->validate($args))
 		{
-			$args = array();
+			$args = array($args);
 		}
 
 		list($mod, $method) = explode('__', $name);
-		$response = $this->xenrpc_parseresponse($this->xenrpc_request($this->getUrl(),
-			$this->xenrpc_method($mod . '.' . $method, array_merge(array($this->getSessionId()), $args))));
 
-		return $response;
+		$rpc_method   = $this->xenrpc_method($mod . '.' . $method, array_merge(array($this->getSessionId()), $args));
+		$response     = $this->xenrpc_request($this->getUrl(), $rpc_method);
+		$xen_response = $this->xenrpc_parseresponse($response);
+
+		return $xen_response;
 	}
 
 }

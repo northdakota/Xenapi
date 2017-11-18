@@ -1,33 +1,22 @@
 <?php namespace Sircamp\Xenapi\Element;
 
-use Respect\Validation\Validator as Validator;
 use GuzzleHttp\Client as Client;
+use Respect\Validation\Validator as Validator;
 use Sircamp\Xenapi\Connection\XenResponse as XenResponse;
 
 class XenVirtualMachine extends XenElement
 {
 
-	private $name;
-	private $vmId;
+	protected $refID;
+	protected $uuid;
+	protected $name;
 
-	public function __construct($xenconnection, $name, $vmId)
+	public function __construct($xenConnection, $refID)
 	{
-		parent::__construct($xenconnection);
-		$this->name = $name;
-		$this->vmId = $vmId;
-	}
-
-
-	/**
-	 * Return a list of all the VMs known to the system.
-	 *
-	 * @param
-	 *
-	 * @return mixed
-	 */
-	public function getAll()
-	{
-		return $this->getXenconnection()->VM__get_all();
+		parent::__construct($xenConnection);
+		$this->refID = $refID;
+		$this->name  = $this->getNameLabel()->getValue();
+		$this->uuid  = $this->getUUID()->getValue();
 	}
 
 	/**
@@ -39,8 +28,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function hardReboot()
 	{
-
-		return $this->getXenconnection()->VM__hard_reboot($this->getVmId());
+		return $this->getXenConnection()->VM__hard_reboot($this->getRefID());
 	}
 
 	/**
@@ -52,7 +40,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function hardShutdown()
 	{
-		return $this->getXenconnection()->VM__hard_shutdown($this->getVmId());
+		return $this->getXenConnection()->VM__hard_shutdown($this->getRefID());
 	}
 
 	/**
@@ -64,7 +52,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function suspend()
 	{
-		return $this->getXenconnection()->VM__suspend($this->getVmId());
+		return $this->getXenConnection()->VM__suspend($this->getRefID());
 	}
 
 	/**
@@ -76,7 +64,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function resume()
 	{
-		return $this->getXenconnection()->VM__resume($this->getVmId());
+		return $this->getXenConnection()->VM__resume($this->getRefID());
 	}
 
 	/**
@@ -107,7 +95,7 @@ class XenVirtualMachine extends XenElement
 			}
 		}
 
-		return $this->getXenconnection()->VM__resume_on($this->getVmId(), $hostRefString);
+		return $this->getXenConnection()->VM__resume_on($this->getRefID(), $hostRefString);
 	}
 
 	/**
@@ -140,7 +128,7 @@ class XenVirtualMachine extends XenElement
 			}
 		}
 
-		return $this->getXenconnection()->VM__pool_migrate($this->getVmId(), $hostRefString, $optionsMap);
+		return $this->getXenConnection()->VM__pool_migrate($this->getRefID(), $hostRefString, $optionsMap);
 	}
 
 	/**
@@ -159,7 +147,7 @@ class XenVirtualMachine extends XenElement
 
 	public function migrateSend($dest, $vdiMap, $vifMap, $options, $live = false)
 	{
-		return $this->getXenconnection()->VM__migrate_send($this->getVmId(), $dest, $live, $vdiMap, $vifMap, $options);
+		return $this->getXenConnection()->VM__migrate_send($this->getRefID(), $dest, $live, $vdiMap, $vifMap, $options);
 	}
 
 
@@ -177,7 +165,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function assertCanMigrate($dest, $vdiMap, $vifMap, $options, $live = false)
 	{
-		return $this->getXenconnection()->VM__assert_can_migrate($this->getVmId(), $dest, $live, $vdiMap, $vifMap, $options);
+		return $this->getXenConnection()->VM__assert_can_migrate($this->getRefID(), $dest, $live, $vdiMap, $vifMap, $options);
 	}
 
 	/**
@@ -189,7 +177,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function cleanReboot()
 	{
-		return $this->getXenconnection()->VM__clean_reboot($this->getVmId());
+		return $this->getXenConnection()->VM__clean_reboot($this->getRefID());
 	}
 
 	/**
@@ -201,7 +189,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function cleanShutdown()
 	{
-		return $this->getXenconnection()->VM__clean_shutdown($this->getVmId());
+		return $this->getXenConnection()->VM__clean_shutdown($this->getRefID());
 	}
 
 
@@ -214,7 +202,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function pause()
 	{
-		return $this->getXenconnection()->VM__pause($this->getVmId());
+		return $this->getXenConnection()->VM__pause($this->getRefID());
 	}
 
 	/**
@@ -226,7 +214,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function unpuse()
 	{
-		return $this->getXenconnection()->VM__unpause($this->getVmId());
+		return $this->getXenConnection()->VM__unpause($this->getRefID());
 	}
 
 
@@ -245,7 +233,7 @@ class XenVirtualMachine extends XenElement
 	public function start($pause = false, $force = true)
 	{
 
-		return $this->getXenconnection()->VM__start($this->getVmId(), $pause, $force);
+		return $this->getXenConnection()->VM__start($this->getRefID(), $pause, $force);
 	}
 
 	/**
@@ -282,7 +270,7 @@ class XenVirtualMachine extends XenElement
 			}
 		}
 
-		return $this->getXenconnection()->VM__start_on($this->getVmId(), $hostRefString, $pause, $force);
+		return $this->getXenConnection()->VM__start_on($this->getRefID(), $hostRefString, $pause, $force);
 	}
 
 	/**
@@ -294,7 +282,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function clonevm($name)
 	{
-		return $this->getXenconnection()->VM__clone($this->getVmId(), $name);
+		return $this->getXenConnection()->VM__clone($this->getRefID(), $name);
 	}
 
 	/**
@@ -306,7 +294,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	function getUUID()
 	{
-		return $this->getXenconnection()->VM__get_uuid($this->getVmId());
+		return $this->getXenConnection()->VM__get_uuid($this->getRefID());
 	}
 
 	/**
@@ -318,7 +306,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	function getConsoles()
 	{
-		return $this->getXenconnection()->VM__get_consoles($this->getVmId());
+		return $this->getXenConnection()->VM__get_consoles($this->getRefID());
 	}
 
 	/**
@@ -330,7 +318,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	function getConsoleUUID($CN)
 	{
-		return $this->getXenconnection()->console__get_uuid($CN);
+		return $this->getXenConnection()->console__get_uuid($CN);
 	}
 
 	/**
@@ -342,7 +330,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	function getPowerState()
 	{
-		return $this->getXenconnection()->VM__get_power_state($this->getVmId());
+		return $this->getXenConnection()->VM__get_power_state($this->getRefID());
 	}
 
 	/**
@@ -356,7 +344,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	function powerStateReset()
 	{
-		return $this->getXenconnection()->VM__power_state_reset($this->getVmId());
+		return $this->getXenConnection()->VM__power_state_reset($this->getRefID());
 	}
 
 
@@ -369,9 +357,9 @@ class XenVirtualMachine extends XenElement
 	 */
 	function getGuestMetrics()
 	{
-		$VMG = $this->getXenconnection()->VM__get_guest_metrics($this->getVmId());
+		$VMG = $this->getXenConnection()->VM__get_guest_metrics($this->getRefID());
 
-		return $this->getXenconnection()->VM_guest_metrics__get_record($VMG->getValue());
+		return $this->getXenConnection()->VM_guest_metrics__get_record($VMG->getValue());
 	}
 
 	/**
@@ -383,9 +371,9 @@ class XenVirtualMachine extends XenElement
 	 */
 	function getMetrics()
 	{
-		$VMG = $this->getXenconnection()->VM__get_metrics($this->getVmId());
+		$VMG = $this->getXenConnection()->VM__get_metrics($this->getRefID());
 
-		return $this->getXenconnection()->VM_metrics__get_record($VMG->getValue());
+		return $this->getXenConnection()->VM_metrics__get_record($VMG->getValue());
 	}
 
 
@@ -399,10 +387,10 @@ class XenVirtualMachine extends XenElement
 	function getStats()
 	{
 
-		$user     = $this->getXenconnection()->getUser();
-		$password = $this->getXenconnection()->getPassword();
-		$ip       = $this->getXenconnection()->getUrl();
-		$uuid     = $this->getUUID($this->getVmId());
+		$user     = $this->getXenConnection()->getUser();
+		$password = $this->getXenConnection()->getPassword();
+		$ip       = $this->getXenConnection()->getUrl();
+		$uuid     = $this->getUUID($this->getRefID());
 
 		$url = 'http://' . $user . ':' . $password . '@' . $ip . '/vm_rrd?uuid=' . $uuid->getValue() . '&start=1000000000‏';
 
@@ -441,17 +429,17 @@ class XenVirtualMachine extends XenElement
 	 */
 	function getDiskSpace($size = null)
 	{
-		$VBD    = $this->getXenconnection()->VBD__get_all();
+		$VBD    = $this->getXenConnection()->VBD__get_all();
 		$memory = 0;
 		foreach ($VBD->getValue() as $bd)
 		{
-			$responsevm   = $this->getXenconnection()->VBD__get_VM($bd);
-			$responsetype = $this->getXenconnection()->VBD__get_type($bd);
+			$responsevm   = $this->getXenConnection()->VBD__get_VM($bd);
+			$responsetype = $this->getXenConnection()->VBD__get_type($bd);
 
-			if ($responsevm->getValue() == $this->getVmId() && $responsetype->getValue() == "Disk")
+			if ($responsevm->getValue() == $this->getRefID() && $responsetype->getValue() == "Disk")
 			{
-				$VDI    = $this->getXenconnection()->VBD__get_VDI($bd);
-				$memory += intval($this->getXenconnection()->VDI__get_virtual_size($VDI->getValue())->getValue());
+				$VDI    = $this->getXenConnection()->VBD__get_VDI($bd);
+				$memory += intval($this->getXenConnection()->VDI__get_virtual_size($VDI->getValue())->getValue());
 			}
 		}
 
@@ -498,9 +486,9 @@ class XenVirtualMachine extends XenElement
 	 *
 	 * @return mixed
 	 */
-	public function getVmId()
+	public function getRefID()
 	{
-		return $this->vmId;
+		return $this->refID;
 	}
 
 	/**
@@ -512,7 +500,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	private function _setVmId($vmId)
 	{
-		$this->vmId = $vmId;
+		$this->refID = $vmId;
 
 		return $this;
 	}
@@ -528,7 +516,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function snapshot($name)
 	{
-		return $this->getXenconnection()->VM__snapshot($this->getVmId(), $name);
+		return $this->getXenConnection()->VM__snapshot($this->getRefID(), $name);
 	}
 
 	//TOFIX
@@ -544,7 +532,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function snapshotWithQuiesce($name)
 	{
-		return $this->getXenconnection()->VM__snapshot_with_quiesce($this->getVmId(), $name);
+		return $this->getXenConnection()->VM__snapshot_with_quiesce($this->getRefID(), $name);
 	}
 
 	/**
@@ -556,7 +544,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function getSnapshotInfo()
 	{
-		return $this->getXenconnection()->VM__get_snapshot_info($this->getVmId());
+		return $this->getXenConnection()->VM__get_snapshot_info($this->getRefID());
 	}
 
 
@@ -572,7 +560,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function copy($name)
 	{
-		return $this->getXenconnection()->VM__copy($this->getVmId(), $name, "");
+		return $this->getXenConnection()->VM__copy($this->getRefID(), $name, "");
 	}
 
 
@@ -586,7 +574,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function destroy()
 	{
-		return $this->getXenconnection()->VM__destroy($this->getVmId());
+		return $this->getXenConnection()->VM__destroy($this->getRefID());
 	}
 
 	/**
@@ -598,7 +586,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function revert($snapshotID)
 	{
-		return $this->getXenconnection()->VM__revert($this->getVmId(), $snapshotID);
+		return $this->getXenConnection()->VM__revert($this->getRefID(), $snapshotID);
 	}
 
 	/**
@@ -612,7 +600,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function checkpoint($name)
 	{
-		return $this->getXenconnection()->VM__checkpoint($this->getVmId(), $name);
+		return $this->getXenConnection()->VM__checkpoint($this->getRefID(), $name);
 	}
 
 
@@ -625,7 +613,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function setStartDelay($seconds)
 	{
-		return $this->getXenconnection()->VM__set_start_delay($this->getVmId(), $seconds);
+		return $this->getXenConnection()->VM__set_start_delay($this->getRefID(), $seconds);
 	}
 
 	/**
@@ -637,7 +625,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function setShutdownDelay($seconds)
 	{
-		return $this->getXenconnection()->VM__set_shutdown_delay($this->getVmId(), $seconds);
+		return $this->getXenConnection()->VM__set_shutdown_delay($this->getRefID(), $seconds);
 	}
 
 	/**
@@ -649,7 +637,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function getStartDelay()
 	{
-		return $this->getXenconnection()->VM__get_start_delay($this->getVmId());
+		return $this->getXenConnection()->VM__get_start_delay($this->getRefID());
 	}
 
 	/**
@@ -661,7 +649,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function getShutdownDelay()
 	{
-		return $this->getXenconnection()->VM__get_shutdown_delay($this->getVmId());
+		return $this->getXenConnection()->VM__get_shutdown_delay($this->getRefID());
 	}
 
 	/**
@@ -673,7 +661,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function getCurrentOperations()
 	{
-		return $this->getXenconnection()->VM__get_current_operations($this->getVmId());
+		return $this->getXenConnection()->VM__get_current_operations($this->getRefID());
 	}
 
 	/**
@@ -685,7 +673,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function getAllowedOperations()
 	{
-		return $this->getXenconnection()->VM__get_allowed_operations($this->getVmId());
+		return $this->getXenConnection()->VM__get_allowed_operations($this->getRefID());
 	}
 
 
@@ -698,7 +686,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function getNameDescription()
 	{
-		return $this->getXenconnection()->VM__get_name_description($this->getVmId());
+		return $this->getXenConnection()->VM__get_name_description($this->getRefID());
 	}
 
 	/**
@@ -710,7 +698,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function setNameDescription($name)
 	{
-		return $this->getXenconnection()->VM__set_name_description($this->getVmId(), $name);
+		return $this->getXenConnection()->VM__set_name_description($this->getRefID(), $name);
 	}
 
 	/**
@@ -722,7 +710,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function getIsATemplate()
 	{
-		return $this->getXenconnection()->VM__get_is_a_template($this->getVmId());
+		return $this->getXenConnection()->VM__get_is_a_template($this->getRefID());
 	}
 
 	/**
@@ -734,7 +722,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function setIsATemplate($template)
 	{
-		return $this->getXenconnection()->VM__set_is_a_template($this->getVmId(), $template);
+		return $this->getXenConnection()->VM__set_is_a_template($this->getRefID(), $template);
 	}
 
 
@@ -748,10 +736,10 @@ class XenVirtualMachine extends XenElement
 	public function getResidentOn()
 	{
 		$xenHost  = null;
-		$response = $this->getXenconnection()->VM__get_resident_on($this->getVmId());
+		$response = $this->getXenConnection()->VM__get_resident_on($this->getRefID());
 		if ($response->getValue() != "")
 		{
-			$xenHost = new XenHost($this->getXenconnection(), null, $response->getValue());
+			$xenHost = new XenHost($this->getXenConnection(), null, $response->getValue());
 			$name    = $xenHost->getNameLabel()->getValue();
 			$xenHost->_setName($name);
 		}
@@ -769,7 +757,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function getPlatform()
 	{
-		return $this->getXenconnection()->VM__get_platform($this->getVmId());
+		return $this->getXenConnection()->VM__get_platform($this->getRefID());
 	}
 
 
@@ -782,7 +770,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function setPlatform($value = array())
 	{
-		return $this->getXenconnection()->VM__set_platform($this->getVmId(), $value);
+		return $this->getXenConnection()->VM__set_platform($this->getRefID(), $value);
 	}
 
 
@@ -795,7 +783,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function getOtherConfig()
 	{
-		return $this->getXenconnection()->VM__get_other_config($this->getVmId());
+		return $this->getXenConnection()->VM__get_other_config($this->getRefID());
 	}
 
 	/**
@@ -807,7 +795,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function setOtherConfig($array = array())
 	{
-		return $this->getXenconnection()->VM__set_other_config($this->getVmId(), $array);
+		return $this->getXenConnection()->VM__set_other_config($this->getRefID(), $array);
 	}
 
 	/**
@@ -819,7 +807,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function addToOtherConfig($key, $value)
 	{
-		return $this->getXenconnection()->VM__add_to_other_config($this->getVmId(), $key, $value);
+		return $this->getXenConnection()->VM__add_to_other_config($this->getRefID(), $key, $value);
 	}
 
 	/**
@@ -832,7 +820,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function removeFromOtherConfig($key)
 	{
-		return $this->getXenconnection()->VM__remove_from_other_config($this->getVmId(), $key);
+		return $this->getXenConnection()->VM__remove_from_other_config($this->getRefID(), $key);
 	}
 
 	/**
@@ -844,7 +832,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function getNameLabel()
 	{
-		return $this->getXenconnection()->VM__get_name_label($this->getVmId());
+		return $this->getXenConnection()->VM__get_name_label($this->getRefID());
 	}
 
 }

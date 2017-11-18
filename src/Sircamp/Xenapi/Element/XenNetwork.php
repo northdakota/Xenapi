@@ -1,17 +1,14 @@
 <?php namespace Sircamp\Xenapi\Element;
 
-use Respect\Validation\Validator as Validator;
-use GuzzleHttp\Client as Client;
-
 class XenNetwork extends XenElement
 {
 
 	private $name;
 	private $networkId;
 
-	public function __construct($xenconnection, $name, $networkId)
+	public function __construct($xenConnection, $name, $networkId)
 	{
-		parent::__construct($xenconnection);
+		parent::__construct($xenConnection);
 		$this->name      = $name;
 		$this->networkId = $networkId;
 	}
@@ -49,7 +46,7 @@ class XenNetwork extends XenElement
 	 */
 	public function getAll()
 	{
-		return $this->getXenconnection()->network__get_all();
+		return $this->getXenConnection()->network__get_all();
 	}
 }
 

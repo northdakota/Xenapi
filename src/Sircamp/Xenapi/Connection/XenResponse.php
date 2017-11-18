@@ -1,8 +1,6 @@
 <?php namespace Sircamp\Xenapi\Connection;
 
 use ReflectionClass;
-use Respect\Validation\Validator as Validator;
-use GuzzleHttp\Client as Client;
 
 class XenResponse
 {

@@ -1,19 +1,17 @@
 <?php namespace Sircamp\Xenapi\Element;
 
-use Respect\Validation\Validator as Validator;
-use GuzzleHttp\Client as Client;
-use Sircamp\Xenapi\Connection\XenConnection as XenConnection;
+use Sircamp\Xenapi\Connection\XenConnection;
 
 
 class XenElement
 {
 
-	private $xenconnection;
+	private $xenConnection;
 
 
-	function __construct($xenconnection)
+	function __construct(XenConnection $xenConnection)
 	{
-		$this->xenconnection = $xenconnection;
+		$this->xenConnection = $xenConnection;
 	}
 
 	/**
@@ -21,9 +19,9 @@ class XenElement
 	 *
 	 * @return mixed
 	 */
-	public function getXenconnection()
+	public function getXenConnection(): XenConnection
 	{
-		return $this->xenconnection;
+		return $this->xenConnection;
 	}
 
 	/**
@@ -35,7 +33,7 @@ class XenElement
 	 */
 	private function _setXenconnection($xenconnection)
 	{
-		$this->xenconnection = $xenconnection;
+		$this->xenConnection = $xenconnection;
 
 		return $this;
 	}
