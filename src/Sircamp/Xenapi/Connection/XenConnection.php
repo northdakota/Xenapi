@@ -1,8 +1,8 @@
 <?php namespace Sircamp\Xenapi\Connection;
 
-use GuzzleHttp\Client as Client;
-use Respect\Validation\Validator as Validator;
-use Sircamp\Xenapi\Exception\XenConnectionException as XenConnectionException;
+use GuzzleHttp\Client;
+use Respect\Validation\Validator;
+use Sircamp\Xenapi\Exception\XenConnectionException;
 
 class XenConnection
 {
@@ -316,6 +316,14 @@ class XenConnection
 		$xen_response = $this->xenrpc_parseresponse($response);
 
 		return $xen_response;
+	}
+
+	/**
+	 * The best practice is to logout the current user if session ends
+	 */
+	function __destruct(){
+		$status = $this->__call('session__logout')->getStatus();
+		return Validator::equals('Success')->validate($status);
 	}
 
 }
