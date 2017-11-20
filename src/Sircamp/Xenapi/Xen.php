@@ -5,8 +5,11 @@ use Sircamp\Xenapi\Connection\XenConnection;
 use Sircamp\Xenapi\Connection\XenResponse;
 use Sircamp\Xenapi\Element\XenHost;
 use Sircamp\Xenapi\Element\XenNetwork;
+use Sircamp\Xenapi\Element\XenPhysicalInterface;
 use Sircamp\Xenapi\Element\XenStorageRepository;
+use Sircamp\Xenapi\Element\XenVirtualLAN;
 use Sircamp\Xenapi\Element\XenVirtualMachine;
+use Sircamp\Xenapi\Exception\XenException;
 
 class Xen
 {
@@ -61,14 +64,60 @@ class Xen
 	}
 
 
+	//VirtualMachine
+//	/**
+//	 * NOT RECOMMENDED and not implemented use $vm->clone or $vm->copy
+//	 */
+//	public function createVirtualMachine()
+//	{
+//
+//	}
+
 	/**
-	 * Get VM inside Hypervisor from name.
-	 *
-	 * @param String $name
+	 * Return a list of all the VMs known to the system
 	 *
 	 * @return array
 	 */
-	public function getVMByNameLabel(String $name): array
+	public function getAllVirtualMachines(): array
+	{
+		$refIDs = $this->xenConnection->__call('VM__get_all')->getValue();
+		$vms    = array();
+		foreach ($refIDs as $refID)
+		{
+			$vms[] = new XenVirtualMachine($this->xenConnection, $refID);
+		}
+
+		return $vms;
+	}
+
+	/**
+	 * Return a array VMs and VM records for all VMs known to the system.
+	 *
+	 * @return array With the Form: [0 => ['vm' => vm_object, 'record'=> record_array]]
+	 */
+	public function getAllVirtualMachineRecords(): array
+	{
+		$map   = $this->xenConnection->__call('VM__get_all_records')->getValue();
+		$vmMap = array();
+
+		foreach ($map as $refID => $record)
+		{
+			$vm      = new XenVirtualMachine($this->xenConnection, $refID);
+			$vmMap[] = ['vm' => $vm, 'record' => $record];
+		}
+
+		return $vmMap;
+	}
+
+
+	/**
+	 * Get all the VM instances with the given label.
+	 *
+	 * @param String $name Label of the object to return
+	 *
+	 * @return array
+	 */
+	public function getVirtualMachineByNameLabel(String $name): array
 	{
 		$refArray = $this->xenConnection->__call('VM__get_by_name_label', [$name])->getValue();
 		$vmArray  = array();
@@ -82,13 +131,13 @@ class Xen
 	}
 
 	/**
-	 * Get a VM by its UUID
+	 * Get a the VM instance with the specified UUID.
 	 *
-	 * @param String $uuid
+	 * @param String $uuid UUID of the object to return
 	 *
 	 * @return XenVirtualMachine
 	 */
-	public function getVMByUUID(String $uuid): XenVirtualMachine
+	public function getVirtualMachineByUUID(String $uuid): XenVirtualMachine
 	{
 		$refID = $this->xenConnection->__call('VM__get_by_uuid', [$uuid])->getValue();
 
@@ -96,26 +145,84 @@ class Xen
 	}
 
 	/**
-	 * Get all VMs from the XenServer
+	 * Import an XVA from a URI
+	 *
+	 * @param string               $url          The URL of the XVA file
+	 * @param XenStorageRepository $sr           The destination SR for the disks
+	 * @param bool                 $full_restore Perform a full restore
+	 * @param bool                 $force        Force the import
 	 *
 	 * @return array
 	 */
-	public function getAllVMs(): array
+	public function importVirtualMachines(string $url, XenStorageRepository $sr, bool $full_restore = false, bool $force = false): array
 	{
-		$refIDs = $this->xenConnection->__call('VM__get_all')->getValue();
+		$refIDs  = $this->xenConnection->__call('VM__import', [$url, $sr->getRefID(), $full_restore, $force])->getValue();
+		$vmArray = array();
+
+		foreach ($refIDs as $refID)
+		{
+			$vmArray[] = new XenVirtualMachine($this->xenConnection, $refID);
+		}
+
+		return $vmArray;
+	}
+
+	/**
+	 * Import using a conversion service.
+	 *
+	 * @param string               $type          Type of the conversion
+	 * @param string               $username      Admin username on the hst
+	 * @param string               $password      Password on the host
+	 * @param XenStorageRepository $sr            The destination SR
+	 * @param array                $remote_config Remote configuration options
+	 */
+	public function importConvertVirtualMachines(string $type, string $username, string $password, XenStorageRepository $sr, array $remote_config = array())
+	{
+		$this->xenConnection->__call('VM__import_convert', [$type, $username, $password, $sr->getRefID(), $remote_config]);
+	}
+
+	//Host
+
+	/**
+	 * Return a list of all the hosts known to the system.
+	 *
+	 * @return array
+	 */
+	public function getAllHosts(): array
+	{
+		$refIDs = $this->xenConnection->__call('host__get_all')->getValue();
 		$vms    = array();
 		foreach ($refIDs as $refID)
 		{
-			$vms[] = new XenVirtualMachine($this->xenConnection, $refID);
+			$vms[] = new XenHost($this->xenConnection, $refID);
 		}
 
 		return $vms;
 	}
 
 	/**
-	 * Get Host from name.
+	 * Return a with Hosts and Hosts records for all VMs known to the system.
 	 *
-	 * @param String $name
+	 * @return array With the Form: [0 => ['host' => host_object, 'record'=> record_array]]
+	 */
+	public function getAllHostRecords()
+	{
+		$map       = $this->xenConnection->__call('VM__get_all_records')->getValue();
+		$hostArray = array();
+
+		foreach ($map as $refID => $record)
+		{
+			$host        = new XenHost($this->xenConnection, $refID);
+			$hostArray[] = ['host' => $host, 'record' => $record];
+		}
+
+		return $hostArray;
+	}
+
+	/**
+	 * Get all the host instances with the given label.
+	 *
+	 * @param String $name label of object to return
 	 *
 	 * @return array
 	 */
@@ -133,9 +240,9 @@ class Xen
 	}
 
 	/**
-	 * Get a Host by its UUID
+	 * Get the host instance with the specified UUID.
 	 *
-	 * @param String $uuid
+	 * @param String $uuid UUID of object to return
 	 *
 	 * @return XenHost
 	 */
@@ -147,25 +254,90 @@ class Xen
 		return new XenHost($this->xenConnection, $refID);
 	}
 
+	//TODO: methods like local_management_reconfigure, management_disable, management_reconfigure
+
 	/**
-	 * Get all Hosts from the XenServer
+	 * Shuts the agent down after a 10 second pause. WARNING: this is a dangerous operation.
+	 * Any operations in progress will be aborted, and unrecoverable data loss may occur.
+	 * The caller is responsible for ensuring that there are no operations in progress when this method is called.
+	 */
+	public function shutdownAgent()
+	{
+		$this->xenConnection->__call('host__shutdown_agent');
+
+	}
+
+	//Network
+
+	/**
+	 * Create a new network instance, and return its handle.
+	 * The args are: name_label, name_description, MTU, other_config*, bridge, managed, tags (* = non-optional).
+	 *
+	 * @param string $name_label
+	 * @param string $name_description
+	 * @param int    $MTU
+	 * @param array  $other_config
+	 * @param string $bridge
+	 * @param bool   $managed
+	 * @param array  $tags
+	 *
+	 * @return XenNetwork
+	 */
+	public function createNetwork(string $name_label, string $name_description = "", int $MTU = 1500, array $other_config = array(), string $bridge = '', bool $managed = true, array $tags = array())
+	{
+
+		//Generate record
+		if (!array_key_exists('automatic', $other_config))
+		{
+			$other_config['automatic'] = 'false';
+		}
+
+		$record = compact('name_label', 'name_description', 'MTU', 'other_config', 'bridge', 'managed', 'tags');
+
+		$xenResponse = $this->xenConnection->__call('network__create', [$record]);
+		$refID       = $xenResponse->getValue();
+
+		return new XenNetwork($this->xenConnection, $refID);
+	}
+
+	/**
+	 * Return a array of all the networks known to the system.
 	 *
 	 * @return array
 	 */
-	public function getAllHosts(): array
+	public function getAllNetworks(): array
 	{
-		$refIDs = $this->xenConnection->__call('host__get_all')->getValue();
+		$refIDs = $this->xenConnection->__call('network__get_all')->getValue();
 		$vms    = array();
 		foreach ($refIDs as $refID)
 		{
-			$vms[] = new XenHost($this->xenConnection, $refID);
+			$vms[] = new XenNetwork($this->xenConnection, $refID);
 		}
 
 		return $vms;
 	}
 
 	/**
-	 * Get Network from name.
+	 * Return an array with networks and network records for all networks known to the system.
+	 *
+	 * @return array With the Form: [0 => ['network' => network_object, 'record'=> record_array]]
+	 */
+	public function getAllNetworkRecords(): array
+	{
+		$map          = $this->xenConnection->__call('network__get_all_records')->getValue();
+		$networkArray = array();
+
+		foreach ($map as $refID => $record)
+		{
+			$network        = new XenNetwork($this->xenConnection, $refID);
+			$networkArray[] = ['network' => $network, 'record' => $record];
+		}
+
+		return $networkArray;
+	}
+
+	/**
+	 * Get all the network instances with the given label.
 	 *
 	 * @param String $name
 	 *
@@ -185,7 +357,7 @@ class Xen
 	}
 
 	/**
-	 * Get a Host by its UUID
+	 * Get the network instance with the specified UUID.
 	 *
 	 * @param String $uuid
 	 *
@@ -199,92 +371,89 @@ class Xen
 		return new XenNetwork($this->xenConnection, $refID);
 	}
 
+	//VirtualLAN
+
 	/**
-	 * Get all Hosts from the XenServer
+	 * Create a VLAN mux/demuxer
+	 *
+	 *
+	 * @param XenPhysicalInterface $xenPIF     PIF which receives the tagged traffic
+	 * @param int                  $tag        VLAN tag to use
+	 * @param XenNetwork           $xenNetwork Network to receive the untagged traffic
+	 *
+	 * @return XenVirtualLAN
+	 */
+	public function createVirtualLAN(XenPhysicalInterface $xenPIF, int $tag, XenNetwork $xenNetwork): XenVirtualLAN
+	{
+		$refID = $this->xenConnection->__call('VLAN__create', [$xenPIF->getRefID(), $tag, $xenNetwork->getRefID()]);
+
+		return new XenVirtualLAN($this->xenConnection, $refID);
+	}
+
+	/**
+	 * Return a list of all the VLANs known to the system.
 	 *
 	 * @return array
 	 */
-	public function getAllNetworks(): array
+	public function getAllVirtualLAN(): array
 	{
-		$refIDs = $this->xenConnection->__call('network__get_all')->getValue();
+		$refIDs = $this->xenConnection->__call('VLAN__get_all')->getValue();
 		$vms    = array();
 		foreach ($refIDs as $refID)
 		{
-			$vms[] = new XenNetwork($this->xenConnection, $refID);
+			$vms[] = new XenVirtualLAN($this->xenConnection, $refID);
 		}
 
 		return $vms;
 	}
 
 	/**
-	 * Return a map of network references to network records for all networks known to the system.
+	 * Return a array with VLANs and VLAN records for all VLANs known to the system.
 	 *
-	 * @return array records of all objects
+	 * @return array With the Form: [0 => ['network' => network_object, 'record'=> record_array]]
 	 */
-	public function getAllNetworkRecords(): array
+	public function getAllVirtualLANRecords(): array
 	{
-		return $this->xenConnection->__call('network__get_all_records')->getValue();
-	}
+		$map       = $this->xenConnection->__call('VLAN__get_all_records')->getValue();
+		$vlanArray = array();
 
-	/**
-	 * Create a new network instance,
-	 *
-	 * @param array $network_record All constructor arguments
-	 *
-	 * @return XenNetwork The newly created XenNetwork
-	 */
-	private function _createNetwork(array $network_record = array())
-	{
-		$refID = $this->xenConnection->__call('network__create', [$network_record]);
-
-		return new XenNetwork($this->xenConnection, $refID);
-	}
-
-//	public function createNetwork(String $name_label, String $name_description, int $MTU, array $other_config, String $bridge="",bool $managed=true,String $tags="")
-//	{
-//
-//		return $this->_createNetwork()
-//	}
-
-	/**
-	 * Get Network from name.
-	 *
-	 * @param String $name
-	 *
-	 * @return array
-	 */
-	public function getStorageRepositoryByNameLabel(String $name): array
-	{
-		$refArray     = $this->xenConnection->__call('SR__get_by_name_label', [$name])->getValue();
-		$networkArray = array();
-
-		foreach ($refArray as $refID)
+		foreach ($map as $refID => $record)
 		{
-			$networkArray[] = new XenStorageRepository($this->xenConnection, $refID);
+			$vlan        = new XenVirtualLAN($this->xenConnection, $refID);
+			$vlanArray[] = ['vlan' => $vlan, 'record' => $record];
 		}
 
-		return $networkArray;
+		return $vlanArray;
 	}
 
 	/**
-	 * Get a Host by its UUID
+	 * Get a reference to the VLAN instance with the specified UUID.
 	 *
 	 * @param String $uuid
 	 *
-	 * @return XenStorageRepository
+	 * @return XenVirtualLAN
 	 */
-	public function getStorageRepositoryByUUID(String $uuid): XenStorageRepository
+	public function getVirtualLANByUUID(String $uuid): XenVirtualLAN
 	{
-		$xenResponse = $this->xenConnection->__call('SR__get_by_uuid', [$uuid]);
+		$xenResponse = $this->xenConnection->__call('VLAN__get_by_uuid', [$uuid]);
 		$refID       = $xenResponse->getValue();
 
-		return new XenStorageRepository($this->xenConnection, $refID);
+		return new XenVirtualLAN($this->xenConnection, $refID);
+	}
+
+
+	//Storage Repositories
+
+	public function createStorageRepository()
+	{
+		//TODO: implement
+		throw new XenException(['Not implemented yet :('], 0);
 	}
 
 	/**
-	 * Get all Hosts from the XenServer
+	 * Return a list of all the SRs known to the system.
 	 *
-	 * @return array
+	 * @return array All SRs
 	 */
 	public function getAllStorageRepositories(): array
 	{
@@ -299,13 +468,94 @@ class Xen
 	}
 
 	/**
-	 * Return a map of network references to network records for all networks known to the system.
+	 * Return an array with StorageRepositories and Storage Repositories records for all VMs known to the system.
 	 *
-	 * @return array records of all objects
+	 * @return array With the Form: [0 => ['sr' => sr_object, 'record'=> record_array]]
 	 */
 	public function getAllStorageRepositoryRecords(): array
 	{
-		return $this->xenConnection->__call('SR__get_all_records')->getValue();
+		$map     = $this->xenConnection->__call('SR__get_all_records')->getValue();
+		$srArray = array();
+
+		foreach ($map as $refID => $record)
+		{
+			$sr        = new XenNetwork($this->xenConnection, $refID);
+			$srArray[] = ['storageRepository' => $sr, 'record' => $record];
+		}
+
+		return $srArray;
+	}
+
+	/**
+	 * Get all the SR instances with the given label.
+	 *
+	 * @param string $name label of object to return
+	 *
+	 * @return array with all SR matching the name label
+	 */
+	public function getStorageRepositoryByNameLabel(string $name): array
+	{
+		$refArray     = $this->xenConnection->__call('SR__get_by_name_label', [$name])->getValue();
+		$networkArray = array();
+
+		foreach ($refArray as $refID)
+		{
+			$networkArray[] = new XenStorageRepository($this->xenConnection, $refID);
+		}
+
+		return $networkArray;
+	}
+
+	/**
+	 * Get the SR instance with the specified UUID.
+	 *
+	 * @param String $uuid
+	 *
+	 * @return XenStorageRepository
+	 */
+	public function getStorageRepositoryByUUID(String $uuid): XenStorageRepository
+	{
+		$xenResponse = $this->xenConnection->__call('SR__get_by_uuid', [$uuid]);
+		$refID       = $xenResponse->getValue();
+
+		return new XenStorageRepository($this->xenConnection, $refID);
+	}
+
+	/**
+	 * Return a set of all the SR types supported by the system
+	 *
+	 * @return array
+	 */
+	public function getSupportedStorageRepositoriesTypes(): array
+	{
+		return $this->xenConnection->__call('SR__get_supported_types')->getValue();
+	}
+
+	/**
+	 * Introduce a new Storage Repository into the managed system
+	 *
+	 * @param array  $sm_config Storage backend specific configuration options
+	 * @param string $name_label
+	 * @param string $name_description
+	 * @param string $type
+	 * @param string $content_type
+	 * @param bool   $shared
+	 *
+	 * @return XenStorageRepository
+	 * @internal param string $uuid
+	 */
+	public function introduceStorageRepository(array $sm_config, string $name_label, string $name_description = '', string $type = 'nfs', string $content_type = '', bool $shared = true): XenStorageRepository
+	{
+		$xenResponse = $this->xenConnection->__call('SR__introduce', ['', $name_label, $name_description, $type, $content_type, $shared, $sm_config]);
+		$refID       = $xenResponse->getValue();
+
+		return new XenStorageRepository($this->xenConnection, $refID);
+	}
+
+	public function probeStorageRepository()
+	{
+		//TODO: implement
+		throw new XenException(['Not implemented yet :('], 0);
 	}
 }
 
