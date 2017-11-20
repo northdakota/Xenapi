@@ -2,12 +2,12 @@
 
 use Respect\Validation\Validator;
 use Sircamp\Xenapi\Connection\XenConnection;
-use Sircamp\Xenapi\Connection\XenResponse;
 use Sircamp\Xenapi\Element\XenHost;
 use Sircamp\Xenapi\Element\XenNetwork;
 use Sircamp\Xenapi\Element\XenPhysicalInterface;
 use Sircamp\Xenapi\Element\XenStorageRepository;
 use Sircamp\Xenapi\Element\XenVirtualDiskImage;
+use Sircamp\Xenapi\Element\XenVirtualInterface;
 use Sircamp\Xenapi\Element\XenVirtualLAN;
 use Sircamp\Xenapi\Element\XenVirtualMachine;
 use Sircamp\Xenapi\Exception\XenException;
@@ -624,10 +624,68 @@ class Xen
 		return new XenVirtualDiskImage($this->xenConnection, $refID);
 	}
 
-	public function introduce()
+	public function introduceVirtualDiskImage()
 	{
 		//TODO: implement
 		throw new XenException(['Not implemented yet :('], 0);
+	}
+
+	//Virtual Interface
+
+	public function createVirtualInterface()
+	{
+
+	}
+
+	/**
+	 * Return a list of all the VDIs known to the system.
+	 *
+	 * @return array
+	 */
+	public function getAllVirtualInterfaces(): array
+	{
+		$refIDs = $this->xenConnection->__call('VIF__get_all')->getValue();
+		$vdis   = array();
+		foreach ($refIDs as $refID)
+		{
+			$vdis[] = new XenVirtualInterface($this->xenConnection, $refID);
+		}
+
+		return $vdis;
+	}
+
+	/**
+	 * Return a array with VIFs and VIF records for all VIFs known to the system.
+	 *
+	 * @return array With the Form: [0 => ['vdi' => vdi_object, 'record'=> record_array]]
+	 */
+	public function getAllVirtualInterfaceRecords(): array
+	{
+		$map      = $this->xenConnection->__call('VIF__get_all_records')->getValue();
+		$vifArray = array();
+
+		foreach ($map as $refID => $record)
+		{
+			$vif        = new XenVirtualInterface($this->xenConnection, $refID);
+			$vifArray[] = ['vif' => $vif, 'record' => $record];
+		}
+
+		return $vifArray;
+	}
+
+	/**
+	 * Get a reference to the VIF instance with the specified UUID.
+	 *
+	 * @param String $uuid
+	 *
+	 * @return XenVirtualInterface
+	 */
+	public function getVirtualInterfaceByUUID(String $uuid): XenVirtualInterface
+	{
+		$xenResponse = $this->xenConnection->__call('VIF__get_by_uuid', [$uuid]);
+		$refID       = $xenResponse->getValue();
+
+		return new XenVirtualInterface($this->xenConnection, $refID);
 	}
 }
 
