@@ -64,7 +64,7 @@ class XenVirtualInterface extends XenElement
 		return $this->get('MTU');
 	}
 
-	public function getVM(): string
+	public function getVM(): XenVirtualMachine
 	{
 		$refID = $this->get('VM');
 
@@ -138,7 +138,7 @@ class XenVirtualInterface extends XenElement
 
 	public function getNetwork(): XenNetwork
 	{
-		return new XenNetwork($this->xenConnection, $this->get($this->get('network')));
+		return new XenNetwork($this->xenConnection, $this->get('network'));
 	}
 
 	public function getOtherConfig(): array
@@ -171,7 +171,7 @@ class XenVirtualInterface extends XenElement
 		return $this->get('status_detail');
 	}
 
-	public function getUUID(): array
+	public function getUUID(): string
 	{
 		return $this->get('uuid');
 	}
@@ -203,12 +203,12 @@ class XenVirtualInterface extends XenElement
 
 	public function setIPv4Allowed(array $addresses)
 	{
-		$this->call('remove_ipv4_allowed', [$addresses]);
+		$this->call('set_ipv4_allowed', [$addresses]);
 	}
 
 	public function setIPv6Allowed(array $addresses)
 	{
-		$this->call('remove_ipv6_allowed', [$addresses]);
+		$this->call('set_ipv6_allowed', [$addresses]);
 	}
 
 	public function setLockingMode(string $mode)

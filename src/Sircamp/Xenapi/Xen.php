@@ -632,9 +632,58 @@ class Xen
 
 	//Virtual Interface
 
-	public function createVirtualInterface()
+	/**
+	 * Create a new VIF instance, and return its handle.
+	 * You have to provide at least a XenNetwork and a XenVirtualMachine
+	 *
+	 * The other args a optional
+	 *
+	 * @param string            $device
+	 * @param XenNetwork        $network
+	 * @param XenVirtualMachine $vm
+	 * @param string            $MAC
+	 * @param int               $MTU
+	 * @param array             $other_config
+	 * @param string            $qos_algorithm_type
+	 * @param array             $qos_algorithm_params
+	 * @param string            $locking_mode
+	 * @param array             $ipv4_allowed
+	 * @param array             $ipv6_allowed
+	 *
+	 * @return XenVirtualInterface
+	 */
+	public function createVirtualInterface(XenNetwork $network, XenVirtualMachine $vm, string $device = '0', string $MAC = "", int $MTU = 1500, array $other_config = array(), string $qos_algorithm_type = '', array $qos_algorithm_params = array(), string $locking_mode = "network_default", array $ipv4_allowed = array(), array $ipv6_allowed = array()): XenVirtualInterface
 	{
+		//Create record
+		$other_config['generated_with'] = 'api';
 
+		if (empty($qos_algorithm_params))
+		{
+			$qos_algorithm_params['generated_with'] = 'api';
+		}
+
+		$record = [
+			'device'               => $device,
+			'network'              => $network->getRefID(),
+			'VM'                   => $vm->getRefID(),
+			'MAC'                  => $MAC,
+			'MTU'                  => $MTU,
+			'other_config'         => $other_config,
+			'qos_algorithm_type'   => $qos_algorithm_type,
+			'qos_algorithm_params' => $qos_algorithm_params,
+			'locking_mode'         => $locking_mode
+		];
+
+
+		$xenResponse = $this->xenConnection->__call('VIF__create', [$record]);
+		$refID       = $xenResponse->getValue();
+		$vif         = new XenVirtualInterface($this->xenConnection, $refID);
+
+		//add ips
+		$vif->setIPv4Allowed($ipv4_allowed);
+		$vif->setIPv6Allowed($ipv6_allowed);
+
+		return $vif;
 	}
 
 	/**
