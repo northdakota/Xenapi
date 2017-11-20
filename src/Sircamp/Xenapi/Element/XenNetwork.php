@@ -3,50 +3,52 @@
 class XenNetwork extends XenElement
 {
 
-	private $name;
-	private $networkId;
+	protected $callPrefix = "network";
 
-	public function __construct($xenConnection, $name, $networkId)
+	//TODO: implement add messages
+	public function addTags(string $tags)
 	{
-		parent::__construct($xenConnection);
-		$this->name      = $name;
-		$this->networkId = $networkId;
+		$this->call('add_tags', [$tags]);
+	}
+	
+	//TODO: implement add_to message
+
+	public function create(array $network_record)
+	{
+		$refID = $this->call('create', [$network_record])->getValue();
+		return new XenNetwork($this->getXenConnection(), $refID);
 	}
 
-	/**
-	 * Gets the value of name.
-	 *
-	 * @return mixed
-	 */
-	public function getName()
+	//TODO create blob message
+
+	public function destroy()
 	{
-		return $this->name;
+		$this->call('destroy');
 	}
 
-	/**
-	 * Sets the value of name.
-	 *
-	 * @param mixed $name the name
-	 *
-	 * @return self
-	 */
-	private function _setName($name)
+	//TODO: implement get messages
+	public function getTags(): array
 	{
-		$this->name = $name;
-
-		return $this;
+		return $this->call('get_tags')->getValue();
 	}
 
-	/**
-	 * Return a list of all the Networks known to the system.
-	 *
-	 * @param
-	 *
-	 * @return mixed
-	 */
-	public function getAll()
+	//TODO implement remove from messages
+
+	public function removePurpose(string $network_purpose)
 	{
-		return $this->getXenConnection()->network__get_all();
+		$this->call('remove_purpose', [$network_purpose]);
+	}
+
+	public function remove_tags(string $tags)
+	{
+		$this->call('remove_tags', [$tags]);
+	}
+
+	//TODO: implement set messages
+
+	public function setTags(array $tags = array())
+	{
+		$this->call('set_tags', [$tags]);
 	}
 }
 
