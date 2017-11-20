@@ -7,6 +7,7 @@ use Sircamp\Xenapi\Element\XenHost;
 use Sircamp\Xenapi\Element\XenNetwork;
 use Sircamp\Xenapi\Element\XenPhysicalInterface;
 use Sircamp\Xenapi\Element\XenStorageRepository;
+use Sircamp\Xenapi\Element\XenVirtualDiskImage;
 use Sircamp\Xenapi\Element\XenVirtualLAN;
 use Sircamp\Xenapi\Element\XenVirtualMachine;
 use Sircamp\Xenapi\Exception\XenException;
@@ -395,7 +396,7 @@ class Xen
 	 *
 	 * @return array
 	 */
-	public function getAllVirtualLAN(): array
+	public function getAllVirtualLANs(): array
 	{
 		$refIDs = $this->xenConnection->__call('VLAN__get_all')->getValue();
 		$vms    = array();
@@ -553,6 +554,77 @@ class Xen
 	}
 
 	public function probeStorageRepository()
+	{
+		//TODO: implement
+		throw new XenException(['Not implemented yet :('], 0);
+	}
+
+	//Virtual Disk Image
+
+	public function createVirtualDiskImage()
+	{
+		//TODO: implement
+		throw new XenException(['Not implemented yet :('], 0);
+	}
+
+	public function dbIntroduceVirtualDiskImage()
+	{
+		//TODO: implement
+		throw new XenException(['Not implemented yet :('], 0);
+	}
+
+	/**
+	 * Return a list of all the VDIs known to the system.
+	 *
+	 * @return array
+	 */
+	public function getAllVirtualDiskImages(): array
+	{
+		$refIDs = $this->xenConnection->__call('VDI__get_all')->getValue();
+		$vdis   = array();
+		foreach ($refIDs as $refID)
+		{
+			$vdis[] = new XenVirtualDiskImage($this->xenConnection, $refID);
+		}
+
+		return $vdis;
+	}
+
+	/**
+	 * Return a array with VDIs and VDI records for all VDIs known to the system.
+	 *
+	 * @return array With the Form: [0 => ['vdi' => vdi_object, 'record'=> record_array]]
+	 */
+	public function getAllVirtualDiskImageRecords(): array
+	{
+		$map      = $this->xenConnection->__call('VDI__get_all_records')->getValue();
+		$vdiArray = array();
+
+		foreach ($map as $refID => $record)
+		{
+			$vlan       = new XenVirtualDiskImage($this->xenConnection, $refID);
+			$vdiArray[] = ['vdi' => $vlan, 'record' => $record];
+		}
+
+		return $vdiArray;
+	}
+
+	/**
+	 * Get a reference to the VDI instance with the specified UUID.
+	 *
+	 * @param String $uuid
+	 *
+	 * @return XenVirtualDiskImage
+	 */
+	public function getVirtualDiskImageByUUID(String $uuid): XenVirtualDiskImage
+	{
+		$xenResponse = $this->xenConnection->__call('VDI__get_by_uuid', [$uuid]);
+		$refID       = $xenResponse->getValue();
+
+		return new XenVirtualDiskImage($this->xenConnection, $refID);
+	}
+
+	public function introduce()
 	{
 		//TODO: implement
 		throw new XenException(['Not implemented yet :('], 0);
