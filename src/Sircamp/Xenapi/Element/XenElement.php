@@ -52,11 +52,11 @@ abstract class XenElement
 	 * change the value of field X (only if it is read-write);
 	 *
 	 * @param String $X
-	 * @param String $value
+	 * @param mixed $value
 	 *
 	 * @internal param String $name
 	 */
-	public function set(String $X, String $value)
+	public function set(String $X, $value)
 	{
 		$this->call('set_'.$X, [$value]);
 	}
