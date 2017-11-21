@@ -28,7 +28,7 @@ class XenVirtualInterface extends XenElement
 		$this->addTo('other_config', $key, $value);
 	}
 
-	public function addToQosAlgorithmParams(string $key, string $value)
+	public function addToQoSAlgorithmParams(string $key, string $value)
 	{
 		$this->addTo('qos_algorithm_params', $key, $value);
 	}
@@ -146,7 +146,7 @@ class XenVirtualInterface extends XenElement
 		return $this->get('other_config');
 	}
 
-	public function getQosAlgorithmParams(): array
+	public function getQoSAlgorithmParams(): array
 	{
 		return $this->get('qos_algorithm_params');
 	}
@@ -203,32 +203,32 @@ class XenVirtualInterface extends XenElement
 
 	public function setIPv4Allowed(array $addresses)
 	{
-		$this->call('set_ipv4_allowed', [$addresses]);
+		$this->set('ipv4_allowed', [$addresses]);
 	}
 
 	public function setIPv6Allowed(array $addresses)
 	{
-		$this->call('set_ipv6_allowed', [$addresses]);
+		$this->set('ipv6_allowed', [$addresses]);
 	}
 
 	public function setLockingMode(string $mode)
 	{
-		$this->call('set_locking_mode', [$mode]);
+		$this->set('locking_mode', [$mode]);
 	}
 
 	public function setOtherConfig(array $config)
 	{
-		$this->call('set_other_config', [$config]);
+		$this->set('other_config', [$config]);
 	}
 
-	public function setQosAlgorithmParams(array $config)
+	public function setQoSAlgorithmParams(array $config)
 	{
-		$this->call('set_qos_algorithm_params', [$config]);
+		$this->set('qos_algorithm_params', [$config]);
 	}
 
-	public function setQosAlgorithmType(string $type)
+	public function setQoSAlgorithmType(string $type)
 	{
-		$this->call('set_qos_algorithm_type', [$type]);
+		$this->set('qos_algorithm_type', [$type]);
 	}
 
 	public function unplug()
