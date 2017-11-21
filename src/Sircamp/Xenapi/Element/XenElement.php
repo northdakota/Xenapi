@@ -48,6 +48,11 @@ abstract class XenElement
 		return $xenResponse;
 	}
 
+	public function assert(string $name, array $args=array())
+	{
+		$this->call('assert_'.$name, $args);
+	}
+
 	/**
 	 * change the value of field X (only if it is read-write);
 	 *
