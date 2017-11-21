@@ -6,6 +6,7 @@ use Sircamp\Xenapi\Element\XenHost;
 use Sircamp\Xenapi\Element\XenNetwork;
 use Sircamp\Xenapi\Element\XenPhysicalInterface;
 use Sircamp\Xenapi\Element\XenStorageRepository;
+use Sircamp\Xenapi\Element\XenVirtualBlockDevice;
 use Sircamp\Xenapi\Element\XenVirtualDiskImage;
 use Sircamp\Xenapi\Element\XenVirtualInterface;
 use Sircamp\Xenapi\Element\XenVirtualLAN;
@@ -610,6 +611,26 @@ class Xen
 	}
 
 	/**
+	 * Get all the SR instances with the given label.
+	 *
+	 * @param string $name label of object to return
+	 *
+	 * @return array with all SR matching the name label
+	 */
+	public function getVirtualDiskImagesByNameLabel(string $name): array
+	{
+		$refArray     = $this->xenConnection->__call('VDI__get_by_name_label', [$name])->getValue();
+		$vdiArray = array();
+
+		foreach ($refArray as $refID)
+		{
+			$vdiArray[] = new XenVirtualDiskImage($this->xenConnection, $refID);
+		}
+
+		return $vdiArray;
+	}
+
+	/**
 	 * Get a reference to the VDI instance with the specified UUID.
 	 *
 	 * @param String $uuid
@@ -629,6 +650,107 @@ class Xen
 		//TODO: implement
 		throw new XenException(['Not implemented yet :('], 0);
 	}
+
+
+	//Virtual Block Device
+
+	/**
+	 * @param XenVirtualMachine   $vm
+	 * @param XenVirtualDiskImage $vdi
+	 * @param string              $user_device Position of the disk
+	 * @param bool                $bootable
+	 * @param string              $mode
+	 * @param string              $type
+	 * @param bool                $unpluggable
+	 * @param bool                $empty
+	 * @param array               $other_config
+	 * @param string              $qos_algorithm_type
+	 * @param array               $qos_algorithm_params
+	 *
+	 * @return XenVirtualBlockDevice
+	 */
+	public function createVirtualBlockDevice(XenVirtualMachine $vm, XenVirtualDiskImage $vdi, string $user_device = '0', bool $bootable = true, string $mode = 'RW', string $type = 'Disk', bool $unpluggable = false, bool $empty = false, array $other_config = array(), string $qos_algorithm_type='', array $qos_algorithm_params = array())
+	{
+		//create record
+		$other_config['generated_with'] = "XenAPI";
+		if (empty($qos_algorithm_params))
+		{
+			$qos_algorithm_params['generated_with'] = 'api';
+		}
+
+		$record = [
+			'VM'                   => $vm->getRefID(),
+			'VDI'                  => $vdi->getRefID(),
+			'userdevice'           => $user_device,
+			'bootable'             => $bootable,
+			'mode'                 => $mode,
+			'type'                 => $type,
+			'unpluggable'          => $unpluggable,
+			'empty'                => $empty,
+			'other_config'         => $other_config,
+			'qos_algorithm_type'   => $qos_algorithm_type,
+			'qos_algorithm_params' => $qos_algorithm_params,
+		];
+
+		$xenResponse = $this->xenConnection->__call('VBD__create', [$record]);
+		$refID       = $xenResponse->getValue();
+		$vbd         = new XenVirtualBlockDevice($this->xenConnection, $refID);
+
+		return $vbd;
+	}
+
+	/**
+	 * Return a list of all the VBDs known to the system.
+	 *
+	 * @return array
+	 */
+	public function getAllVirtualBlockDevices(): array
+	{
+		$refIDs = $this->xenConnection->__call('VBD__get_all')->getValue();
+		$vbds   = array();
+		foreach ($refIDs as $refID)
+		{
+			$vbds[] = new XenVirtualBlockDevice($this->xenConnection, $refID);
+		}
+
+		return $vbds;
+	}
+
+	/**
+	 * Return a array with VBDs and VBD records for all VBDs known to the system.
+	 *
+	 * @return array With the Form: [0 => ['vbd' => vbd_object, 'record'=> record_array]]
+	 */
+	public function getAllVirtualBlockDeviceRecords(): array
+	{
+		$map      = $this->xenConnection->__call('VBD__get_all_records')->getValue();
+		$vbdArray = array();
+
+		foreach ($map as $refID => $record)
+		{
+			$vbd        = new XenVirtualBlockDevice($this->xenConnection, $refID);
+			$vbdArray[] = ['vbd' => $vbd, 'record' => $record];
+		}
+
+		return $vbdArray;
+	}
+
+	/**
+	 * Get a reference to the VBD instance with the specified UUID.
+	 *
+	 * @param String $uuid
+	 *
+	 * @return XenVirtualBlockDevice
+	 */
+	public function getVirtualBlockDeviceByUUID(String $uuid): XenVirtualBlockDevice
+	{
+		$xenResponse = $this->xenConnection->__call('VBD__get_by_uuid', [$uuid]);
+		$refID       = $xenResponse->getValue();
+
+		return new XenVirtualBlockDevice($this->xenConnection, $refID);
+	}
+
+
 
 	//Virtual Interface
 
@@ -687,7 +809,7 @@ class Xen
 	}
 
 	/**
-	 * Return a list of all the VDIs known to the system.
+	 * Return a list of all the VIFs known to the system.
 	 *
 	 * @return array
 	 */
