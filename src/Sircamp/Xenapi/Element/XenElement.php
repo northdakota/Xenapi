@@ -58,7 +58,7 @@ abstract class XenElement
 	 */
 	public function set(String $X, String $value)
 	{
-		$this->call('set_'.$X, $value);
+		$this->call('set_'.$X, [$value]);
 	}
 
 	/**
