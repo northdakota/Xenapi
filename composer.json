@@ -10,6 +10,12 @@
             "email": "sircampydevelop@gmail.com",
             "role": "Developer",
             "homepage": "http://www.stefanocampese.xyz"
+        },
+        {
+            "name": "Oliver Wycisk",
+            "email": "",
+            "role": "Developer",
+            "homepage": "www.o-wycisk.de"
         }
     ],
     "require": {
@@ -18,11 +24,8 @@
         "guzzlehttp/guzzle": "^6.3"
     },
     "autoload": {
-        "classmap": [
-            
-        ],
         "psr-0": {
-            "Sircamp\\Xenapi\\": "src/"
+            "Sircamp\\Xenapi\\": "src/Sircamp/Xenapi/"
         }
     },
     "suggest": {
