@@ -193,7 +193,7 @@ class XenConnection
 					'Content-length' => strlen($request),
 				],
 				'body'    => $request,
-				'timeout' => 120,
+				'timeout' => 60,
 				'verify'  => false,
 
 			]);
@@ -290,6 +290,10 @@ class XenConnection
 	 */
 	function __destruct()
 	{
+		//Only logout if we are logged in
+		if(!isset($this->session_id)){
+			return false;
+		}
 		$status = $this->__call('session__logout')->getStatus();
 
 		return Validator::equals('Success')->validate($status);
