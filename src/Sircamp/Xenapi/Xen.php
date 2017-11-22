@@ -619,7 +619,7 @@ class Xen
 	 */
 	public function getVirtualDiskImagesByNameLabel(string $name): array
 	{
-		$refArray     = $this->xenConnection->__call('VDI__get_by_name_label', [$name])->getValue();
+		$refArray = $this->xenConnection->__call('VDI__get_by_name_label', [$name])->getValue();
 		$vdiArray = array();
 
 		foreach ($refArray as $refID)
@@ -669,7 +669,7 @@ class Xen
 	 *
 	 * @return XenVirtualBlockDevice
 	 */
-	public function createVirtualBlockDevice(XenVirtualMachine $vm, XenVirtualDiskImage $vdi, string $user_device = '0', bool $bootable = true, string $mode = 'RW', string $type = 'Disk', bool $unpluggable = false, bool $empty = false, array $other_config = array(), string $qos_algorithm_type='', array $qos_algorithm_params = array())
+	public function createVirtualBlockDevice(XenVirtualMachine $vm, XenVirtualDiskImage $vdi, string $user_device = '0', bool $bootable = true, string $mode = 'RW', string $type = 'Disk', bool $unpluggable = false, bool $empty = false, array $other_config = array(), string $qos_algorithm_type = '', array $qos_algorithm_params = array())
 	{
 		//create record
 		$other_config['generated_with'] = "XenAPI";
@@ -828,7 +828,7 @@ class Xen
 	/**
 	 * Return a array with VIFs and VIF records for all VIFs known to the system.
 	 *
-	 * @return array With the Form: [0 => ['vdi' => vdi_object, 'record'=> record_array]]
+	 * @return array With the Form: [0 => ['vif' => vif_object, 'record'=> record_array]]
 	 */
 	public function getAllVirtualInterfaceRecords(): array
 	{
@@ -858,6 +858,88 @@ class Xen
 
 		return new XenVirtualInterface($this->xenConnection, $refID);
 	}
+
+	//Physical Interfaces
+
+	/**
+	 * Return a list of all the PIFs known to the system.
+	 *
+	 * @return array
+	 */
+	public function getAllPhysicalInterfaces(): array
+	{
+		$refIDs = $this->xenConnection->__call('PIF__get_all')->getValue();
+		$pifs   = array();
+		foreach ($refIDs as $refID)
+		{
+			$pifs[] = new XenPhysicalInterface($this->xenConnection, $refID);
+		}
+
+		return $pifs;
+	}
+
+	/**
+	 * Return a array with PIFs and PIF records for all PIFs known to the system.
+	 *
+	 * @return array With the Form: [0 => ['pif' => vdi_object, 'record'=> record_array]]
+	 */
+	public function getAllPhysicalInterfaceRecords(): array
+	{
+		$map      = $this->xenConnection->__call('PIF__get_all_records')->getValue();
+		$pifArray = array();
+
+		foreach ($map as $refID => $record)
+		{
+			$pif        = new XenPhysicalInterface($this->xenConnection, $refID);
+			$pifArray[] = ['vif' => $pif, 'record' => $record];
+		}
+
+		return $pifArray;
+	}
+
+	/**
+	 * Get a reference to the PIF instance with the specified UUID.
+	 *
+	 * @param String $uuid
+	 *
+	 * @return XenPhysicalInterface
+	 */
+	public function getPhysicalInterfaceByUUID(String $uuid): XenPhysicalInterface
+	{
+		$xenResponse = $this->xenConnection->__call('PIF__get_by_uuid', [$uuid]);
+		$refID       = $xenResponse->getValue();
+
+		return new XenPhysicalInterface($this->xenConnection, $refID);
+	}
+
+	/**
+	 * Create a PIF object matching a particular network interface
+	 *
+	 * @param XenHost $host
+	 * @param string  $MAC
+	 * @param string  $device
+	 * @param bool    $managed
+	 *
+	 * @return XenPhysicalInterface
+	 */
+	public function introducePhysicalInterface(XenHost $host, string $MAC = '', string $device = '0', bool $managed = true): XenPhysicalInterface
+	{
+		$refID = $this->xenConnection->__call('PIF__introduce', [$host->getRefID(), $MAC, $device, $managed]);
+
+		return new XenPhysicalInterface($this->xenConnection, $refID);
+	}
+
+	/**
+	 * Scan for physical interfaces on a host and create PIF objects to represent them
+	 *
+	 * @param XenHost $host
+	 */
+	public function scanPhysicalInterface(XenHost $host)
+	{
+		$this->xenConnection->__call('PIF__scan', [$host->getRefID()]);
+	}
+
+
 }
 
 ?>
