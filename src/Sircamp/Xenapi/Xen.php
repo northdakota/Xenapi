@@ -65,6 +65,10 @@ class Xen
 		}
 	}
 
+	public function getXenConnection()
+	{
+		return $this->xenConnection;
+	}
 
 	//VirtualMachine
 //	/**
@@ -209,7 +213,7 @@ class Xen
 	 */
 	public function getAllHostRecords()
 	{
-		$map       = $this->xenConnection->__call('VM__get_all_records')->getValue();
+		$map       = $this->xenConnection->__call('host__get_all_records')->getValue();
 		$hostArray = array();
 
 		foreach ($map as $refID => $record)
@@ -891,7 +895,7 @@ class Xen
 		foreach ($map as $refID => $record)
 		{
 			$pif        = new XenPhysicalInterface($this->xenConnection, $refID);
-			$pifArray[] = ['vif' => $pif, 'record' => $record];
+			$pifArray[] = ['pif' => $pif, 'record' => $record];
 		}
 
 		return $pifArray;
