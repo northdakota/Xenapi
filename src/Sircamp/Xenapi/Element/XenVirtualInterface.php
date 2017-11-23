@@ -203,32 +203,32 @@ class XenVirtualInterface extends XenElement
 
 	public function setIPv4Allowed(array $addresses)
 	{
-		$this->set('ipv4_allowed', [$addresses]);
+		$this->set('ipv4_allowed', $addresses);
 	}
 
 	public function setIPv6Allowed(array $addresses)
 	{
-		$this->set('ipv6_allowed', [$addresses]);
+		$this->set('ipv6_allowed', $addresses);
 	}
 
 	public function setLockingMode(string $mode)
 	{
-		$this->set('locking_mode', [$mode]);
+		$this->set('locking_mode', $mode);
 	}
 
 	public function setOtherConfig(array $config)
 	{
-		$this->set('other_config', [$config]);
+		$this->set('other_config',$config);
 	}
 
 	public function setQoSAlgorithmParams(array $config)
 	{
-		$this->set('qos_algorithm_params', [$config]);
+		$this->set('qos_algorithm_params', $config);
 	}
 
 	public function setQoSAlgorithmType(string $type)
 	{
-		$this->set('qos_algorithm_type', [$type]);
+		$this->set('qos_algorithm_type', $type);
 	}
 
 	public function unplug()

@@ -294,7 +294,7 @@ class XenVirtualBlockDevice extends XenElement
 	 */
 	public function setOtherConfig(array $config)
 	{
-		$this->set('other_config', [$config]);
+		$this->set('other_config', $config);
 	}
 
 	/**
@@ -302,7 +302,7 @@ class XenVirtualBlockDevice extends XenElement
 	 */
 	public function setQoSAlgorithmParams(array $config)
 	{
-		$this->set('qos_algorithm_params', [$config]);
+		$this->set('qos_algorithm_params', $config);
 	}
 
 	/**
@@ -310,7 +310,7 @@ class XenVirtualBlockDevice extends XenElement
 	 */
 	public function setQoSAlgorithmType(string $type)
 	{
-		$this->set('qos_algorithm_type', [$type]);
+		$this->set('qos_algorithm_type', $type);
 	}
 
 	/**
