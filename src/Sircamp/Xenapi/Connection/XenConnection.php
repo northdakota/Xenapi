@@ -15,6 +15,7 @@ class XenConnection
 	private $password;
 
 	public static $debug = false;
+	public static $debug_file = __DIR__ . "debug.log";
 
 	function __construct()
 	{
@@ -202,6 +203,7 @@ class XenConnection
 			]);
 
 		$body = $response->getBody();
+
 		return xmlrpc_decode((string) $body);
 	}
 
@@ -288,7 +290,6 @@ class XenConnection
 	}
 
 
-
 	/**
 	 * Handles incoming regular call to the xen api and trows a XenException if the request fails
 	 *
@@ -304,19 +305,25 @@ class XenConnection
 		array_unshift($args, $this->getSessionId());
 		//Generate XenResponse
 		$rpcMethod   = $this->xenRPC_method($name, $args);
-		$response     = $this->xenRPC_request($this->getUrl(), $rpcMethod);
+		$response    = $this->xenRPC_request($this->getUrl(), $rpcMethod);
 		$xenResponse = $this->xenRPC_parse_response($response);
 
-		if(XenConnection::$debug){
+		if (XenConnection::$debug)
+		{
 			//Debug messages
-			echo "Called: ".$name;
-			echo " Value: ".json_encode($xenResponse->getValue());
-			echo " Status: ".json_encode($xenResponse->getStatus());
-			if(!empty($xenResponse->getErrorDescription())){
-				echo " Error: ".json_encode($xenResponse->getErrorDescription(), true)."\n";
-			}else{
-				echo "\n";
+			$log = "Called: " . $name;
+			$log .= " Value: " . json_encode($xenResponse->getValue());
+			$log .= " Status: " . json_encode($xenResponse->getStatus());
+			if (!empty($xenResponse->getErrorDescription()))
+			{
+				$log .= " Error: " . json_encode($xenResponse->getErrorDescription(), true) . "\n";
 			}
+			else
+			{
+				$log .= "\n";
+			}
+
+			file_put_contents(XenConnection::$debug_file,$log, FILE_APPEND);
 		}
 
 		//Test if the request was successful
@@ -334,7 +341,8 @@ class XenConnection
 	function __destruct()
 	{
 		//Only logout if we are logged in
-		if(!isset($this->session_id)){
+		if (!isset($this->session_id))
+		{
 			return false;
 		}
 		$status = $this->__call('session__logout')->getStatus();

@@ -92,9 +92,10 @@ class Xen
 	}
 
 
-	public function enableDebug()
+	public function enableDebug(string $filename)
 	{
 		XenConnection::$debug = true;
+		XenConnection::$debug_file = $filename;
 	}
 
 	public function disableDebug()
