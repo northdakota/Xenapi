@@ -3,6 +3,7 @@
 use GuzzleHttp\Client;
 use Respect\Validation\Validator;
 use Sircamp\Xenapi\Exception\XenConnectionException;
+use Sircamp\Xenapi\Exception\XenException;
 
 class XenConnection
 {
@@ -210,6 +211,7 @@ class XenConnection
 	 * @param array $response
 	 *
 	 * @return XenResponse
+	 * @throws XenException
 	 */
 
 	function xenRPC_parse_response(array $response): XenResponse
@@ -248,9 +250,7 @@ class XenConnection
 				}
 				else
 				{
-					//TODO: add error handling
-					return new XenResponse($response);
-
+					throw new XenException($response['ErrorDescription'], 1);
 				}
 			}
 		}
@@ -269,7 +269,7 @@ class XenConnection
 	 * @return XenResponse
 	 */
 
-	function __call(String $name, array $args = array()): XenResponse
+	public function __call(String $name, array $args = array()): XenResponse
 	{
 		if (!Validator::arrayType()->validate($args))
 		{
@@ -283,6 +283,35 @@ class XenConnection
 		$xen_response = $this->xenRPC_parse_response($response);
 
 		return $xen_response;
+	}
+
+
+
+	/**
+	 * Handles incoming regular call to the xen api and trows a XenException if the request fails
+	 *
+	 * @param string $name
+	 * @param array  $args
+	 *
+	 * @return mixed
+	 * @throws XenException
+	 */
+	public function call(string $name, array $args = array())
+	{
+		//Set the session to the first place
+		array_unshift($args, $this->getSessionId());
+		//Generate XenResponse
+		$rpcMethod   = $this->xenRPC_method($name, $args);
+		$response     = $this->xenRPC_request($this->getUrl(), $rpcMethod);
+		$xenResponse = $this->xenRPC_parse_response($response);
+
+		//Test if the request was successful
+		if (Validator::equals('Failure')->validate($xenResponse->getStatus()))
+		{
+			throw new XenException($xenResponse->getErrorDescription(), 1);
+		}
+
+		return $xenResponse->getValue();
 	}
 
 	/**

@@ -2,6 +2,7 @@
 
 use Respect\Validation\Validator;
 use Sircamp\Xenapi\Connection\XenConnection;
+use Sircamp\Xenapi\Connection\XenResponse;
 use Sircamp\Xenapi\Element\XenHost;
 use Sircamp\Xenapi\Element\XenNetwork;
 use Sircamp\Xenapi\Element\XenPhysicalInterface;
@@ -65,6 +66,26 @@ class Xen
 		}
 	}
 
+	/**
+	 * This function delegates function calls like $xen->VM__get_all();
+	 * to the _call function of thr XenConnection object and returns the XenResponse
+	 *
+	 *
+	 * @param string $name
+	 * @param array  $args
+	 *
+	 * @return XenResponse
+	 */
+	public function __call(string $name, array $args = array()) : XenResponse
+	{
+		return $this->getXenConnection()->__call($name, $args);
+	}
+
+	/**
+	 * This returns the XenConnection object
+	 *
+	 * @return null|XenConnection
+	 */
 	public function getXenConnection()
 	{
 		return $this->xenConnection;
@@ -86,7 +107,7 @@ class Xen
 	 */
 	public function getAllVirtualMachines(): array
 	{
-		$refIDs = $this->xenConnection->__call('VM__get_all')->getValue();
+		$refIDs = $this->xenConnection->call('VM.get_all');
 		$vms    = array();
 		foreach ($refIDs as $refID)
 		{
@@ -103,7 +124,7 @@ class Xen
 	 */
 	public function getAllVirtualMachineRecords(): array
 	{
-		$map   = $this->xenConnection->__call('VM__get_all_records')->getValue();
+		$map   = $this->xenConnection->call('VM.get_all_records');
 		$vmMap = array();
 
 		foreach ($map as $refID => $record)
@@ -125,7 +146,7 @@ class Xen
 	 */
 	public function getVirtualMachineByNameLabel(String $name): array
 	{
-		$refArray = $this->xenConnection->__call('VM__get_by_name_label', [$name])->getValue();
+		$refArray = $this->xenConnection->call('VM.get_by_name_label', [$name]);
 		$vmArray  = array();
 
 		foreach ($refArray as $refID)
@@ -145,7 +166,7 @@ class Xen
 	 */
 	public function getVirtualMachineByUUID(String $uuid): XenVirtualMachine
 	{
-		$refID = $this->xenConnection->__call('VM__get_by_uuid', [$uuid])->getValue();
+		$refID = $this->xenConnection->call('VM.get_by_uuid', [$uuid]);
 
 		return new XenVirtualMachine($this->xenConnection, $refID);
 	}
@@ -162,7 +183,7 @@ class Xen
 	 */
 	public function importVirtualMachines(string $url, XenStorageRepository $sr, bool $full_restore = false, bool $force = false): array
 	{
-		$refIDs  = $this->xenConnection->__call('VM__import', [$url, $sr->getRefID(), $full_restore, $force])->getValue();
+		$refIDs  = $this->xenConnection->call('VM.import', [$url, $sr->getRefID(), $full_restore, $force]);
 		$vmArray = array();
 
 		foreach ($refIDs as $refID)
@@ -184,7 +205,7 @@ class Xen
 	 */
 	public function importConvertVirtualMachines(string $type, string $username, string $password, XenStorageRepository $sr, array $remote_config = array())
 	{
-		$this->xenConnection->__call('VM__import_convert', [$type, $username, $password, $sr->getRefID(), $remote_config]);
+		$this->xenConnection->call('VM.import_convert', [$type, $username, $password, $sr->getRefID(), $remote_config]);
 	}
 
 	//Host
@@ -196,7 +217,7 @@ class Xen
 	 */
 	public function getAllHosts(): array
 	{
-		$refIDs = $this->xenConnection->__call('host__get_all')->getValue();
+		$refIDs = $this->xenConnection->call('host.get_all');
 		$vms    = array();
 		foreach ($refIDs as $refID)
 		{
@@ -213,7 +234,7 @@ class Xen
 	 */
 	public function getAllHostRecords()
 	{
-		$map       = $this->xenConnection->__call('host__get_all_records')->getValue();
+		$map       = $this->xenConnection->call('host.get_all_records');
 		$hostArray = array();
 
 		foreach ($map as $refID => $record)
@@ -234,7 +255,7 @@ class Xen
 	 */
 	public function getHostByNameLabel(String $name): array
 	{
-		$refArray  = $this->xenConnection->__call('host__get_by_name_label', [$name])->getValue();
+		$refArray  = $this->xenConnection->call('host.get_by_name_label', [$name]);
 		$hostArray = array();
 
 		foreach ($refArray as $refID)
@@ -254,8 +275,8 @@ class Xen
 	 */
 	public function getHostByUUID(String $uuid): XenHost
 	{
-		$xenResponse = $this->xenConnection->__call('host__get_by_uuid', [$uuid]);
-		$refID       = $xenResponse->getValue();
+		$xenResponse = $this->xenConnection->call('host.get_by_uuid', [$uuid]);
+		$refID       = $xenResponse;
 
 		return new XenHost($this->xenConnection, $refID);
 	}
@@ -269,7 +290,7 @@ class Xen
 	 */
 	public function shutdownAgent()
 	{
-		$this->xenConnection->__call('host__shutdown_agent');
+		$this->xenConnection->call('host.shutdown_agent');
 
 	}
 
@@ -300,8 +321,8 @@ class Xen
 
 		$record = compact('name_label', 'name_description', 'MTU', 'other_config', 'bridge', 'managed', 'tags');
 
-		$xenResponse = $this->xenConnection->__call('network__create', [$record]);
-		$refID       = $xenResponse->getValue();
+		$xenResponse = $this->xenConnection->call('network.create', [$record]);
+		$refID       = $xenResponse;
 
 		return new XenNetwork($this->xenConnection, $refID);
 	}
@@ -313,7 +334,7 @@ class Xen
 	 */
 	public function getAllNetworks(): array
 	{
-		$refIDs = $this->xenConnection->__call('network__get_all')->getValue();
+		$refIDs = $this->xenConnection->call('network.get_all');
 		$vms    = array();
 		foreach ($refIDs as $refID)
 		{
@@ -330,7 +351,7 @@ class Xen
 	 */
 	public function getAllNetworkRecords(): array
 	{
-		$map          = $this->xenConnection->__call('network__get_all_records')->getValue();
+		$map          = $this->xenConnection->call('network.get_all_records');
 		$networkArray = array();
 
 		foreach ($map as $refID => $record)
@@ -351,7 +372,7 @@ class Xen
 	 */
 	public function getNetworkByNameLabel(String $name): array
 	{
-		$refArray     = $this->xenConnection->__call('network__get_by_name_label', [$name])->getValue();
+		$refArray     = $this->xenConnection->call('network.get_by_name_label', [$name]);
 		$networkArray = array();
 
 		foreach ($refArray as $refID)
@@ -371,8 +392,8 @@ class Xen
 	 */
 	public function getNetworkByUUID(String $uuid): XenNetwork
 	{
-		$xenResponse = $this->xenConnection->__call('network__get_by_uuid', [$uuid]);
-		$refID       = $xenResponse->getValue();
+		$xenResponse = $this->xenConnection->call('network.get_by_uuid', [$uuid]);
+		$refID       = $xenResponse;
 
 		return new XenNetwork($this->xenConnection, $refID);
 	}
@@ -391,7 +412,7 @@ class Xen
 	 */
 	public function createVirtualLAN(XenPhysicalInterface $xenPIF, int $tag, XenNetwork $xenNetwork): XenVirtualLAN
 	{
-		$refID = $this->xenConnection->__call('VLAN__create', [$xenPIF->getRefID(), $tag, $xenNetwork->getRefID()]);
+		$refID = $this->xenConnection->call('VLAN.create', [$xenPIF->getRefID(), $tag, $xenNetwork->getRefID()]);
 
 		return new XenVirtualLAN($this->xenConnection, $refID);
 	}
@@ -403,7 +424,7 @@ class Xen
 	 */
 	public function getAllVirtualLANs(): array
 	{
-		$refIDs = $this->xenConnection->__call('VLAN__get_all')->getValue();
+		$refIDs = $this->xenConnection->call('VLAN.get_all');
 		$vms    = array();
 		foreach ($refIDs as $refID)
 		{
@@ -420,7 +441,7 @@ class Xen
 	 */
 	public function getAllVirtualLANRecords(): array
 	{
-		$map       = $this->xenConnection->__call('VLAN__get_all_records')->getValue();
+		$map       = $this->xenConnection->call('VLAN.get_all_records');
 		$vlanArray = array();
 
 		foreach ($map as $refID => $record)
@@ -441,8 +462,8 @@ class Xen
 	 */
 	public function getVirtualLANByUUID(String $uuid): XenVirtualLAN
 	{
-		$xenResponse = $this->xenConnection->__call('VLAN__get_by_uuid', [$uuid]);
-		$refID       = $xenResponse->getValue();
+		$xenResponse = $this->xenConnection->call('VLAN.get_by_uuid', [$uuid]);
+		$refID       = $xenResponse;
 
 		return new XenVirtualLAN($this->xenConnection, $refID);
 	}
@@ -463,7 +484,7 @@ class Xen
 	 */
 	public function getAllStorageRepositories(): array
 	{
-		$refIDs = $this->xenConnection->__call('SR__get_all')->getValue();
+		$refIDs = $this->xenConnection->call('SR.get_all');
 		$vms    = array();
 		foreach ($refIDs as $refID)
 		{
@@ -480,7 +501,7 @@ class Xen
 	 */
 	public function getAllStorageRepositoryRecords(): array
 	{
-		$map     = $this->xenConnection->__call('SR__get_all_records')->getValue();
+		$map     = $this->xenConnection->call('SR.get_all_records');
 		$srArray = array();
 
 		foreach ($map as $refID => $record)
@@ -501,7 +522,7 @@ class Xen
 	 */
 	public function getStorageRepositoryByNameLabel(string $name): array
 	{
-		$refArray     = $this->xenConnection->__call('SR__get_by_name_label', [$name])->getValue();
+		$refArray     = $this->xenConnection->call('SR.get_by_name_label', [$name]);
 		$networkArray = array();
 
 		foreach ($refArray as $refID)
@@ -521,8 +542,8 @@ class Xen
 	 */
 	public function getStorageRepositoryByUUID(String $uuid): XenStorageRepository
 	{
-		$xenResponse = $this->xenConnection->__call('SR__get_by_uuid', [$uuid]);
-		$refID       = $xenResponse->getValue();
+		$xenResponse = $this->xenConnection->call('SR.get_by_uuid', [$uuid]);
+		$refID       = $xenResponse;
 
 		return new XenStorageRepository($this->xenConnection, $refID);
 	}
@@ -534,7 +555,7 @@ class Xen
 	 */
 	public function getSupportedStorageRepositoriesTypes(): array
 	{
-		return $this->xenConnection->__call('SR__get_supported_types')->getValue();
+		return $this->xenConnection->call('SR.get_supported_types');
 	}
 
 	/**
@@ -552,8 +573,8 @@ class Xen
 	 */
 	public function introduceStorageRepository(array $sm_config, string $name_label, string $name_description = '', string $type = 'nfs', string $content_type = '', bool $shared = true): XenStorageRepository
 	{
-		$xenResponse = $this->xenConnection->__call('SR__introduce', ['', $name_label, $name_description, $type, $content_type, $shared, $sm_config]);
-		$refID       = $xenResponse->getValue();
+		$xenResponse = $this->xenConnection->call('SR.introduce', ['', $name_label, $name_description, $type, $content_type, $shared, $sm_config]);
+		$refID       = $xenResponse;
 
 		return new XenStorageRepository($this->xenConnection, $refID);
 	}
@@ -585,7 +606,7 @@ class Xen
 	 */
 	public function getAllVirtualDiskImages(): array
 	{
-		$refIDs = $this->xenConnection->__call('VDI__get_all')->getValue();
+		$refIDs = $this->xenConnection->call('VDI.get_all');
 		$vdis   = array();
 		foreach ($refIDs as $refID)
 		{
@@ -602,7 +623,7 @@ class Xen
 	 */
 	public function getAllVirtualDiskImageRecords(): array
 	{
-		$map      = $this->xenConnection->__call('VDI__get_all_records')->getValue();
+		$map      = $this->xenConnection->call('VDI.get_all_records');
 		$vdiArray = array();
 
 		foreach ($map as $refID => $record)
@@ -623,7 +644,7 @@ class Xen
 	 */
 	public function getVirtualDiskImagesByNameLabel(string $name): array
 	{
-		$refArray = $this->xenConnection->__call('VDI__get_by_name_label', [$name])->getValue();
+		$refArray = $this->xenConnection->call('VDI.get_by_name_label', [$name]);
 		$vdiArray = array();
 
 		foreach ($refArray as $refID)
@@ -643,8 +664,8 @@ class Xen
 	 */
 	public function getVirtualDiskImageByUUID(String $uuid): XenVirtualDiskImage
 	{
-		$xenResponse = $this->xenConnection->__call('VDI__get_by_uuid', [$uuid]);
-		$refID       = $xenResponse->getValue();
+		$xenResponse = $this->xenConnection->call('VDI.get_by_uuid', [$uuid]);
+		$refID       = $xenResponse;
 
 		return new XenVirtualDiskImage($this->xenConnection, $refID);
 	}
@@ -696,8 +717,8 @@ class Xen
 			'qos_algorithm_params' => $qos_algorithm_params,
 		];
 
-		$xenResponse = $this->xenConnection->__call('VBD__create', [$record]);
-		$refID       = $xenResponse->getValue();
+		$xenResponse = $this->xenConnection->call('VBD.create', [$record]);
+		$refID       = $xenResponse;
 		$vbd         = new XenVirtualBlockDevice($this->xenConnection, $refID);
 
 		return $vbd;
@@ -710,7 +731,7 @@ class Xen
 	 */
 	public function getAllVirtualBlockDevices(): array
 	{
-		$refIDs = $this->xenConnection->__call('VBD__get_all')->getValue();
+		$refIDs = $this->xenConnection->call('VBD.get_all');
 		$vbds   = array();
 		foreach ($refIDs as $refID)
 		{
@@ -727,7 +748,7 @@ class Xen
 	 */
 	public function getAllVirtualBlockDeviceRecords(): array
 	{
-		$map      = $this->xenConnection->__call('VBD__get_all_records')->getValue();
+		$map      = $this->xenConnection->call('VBD.get_all_records');
 		$vbdArray = array();
 
 		foreach ($map as $refID => $record)
@@ -748,8 +769,8 @@ class Xen
 	 */
 	public function getVirtualBlockDeviceByUUID(String $uuid): XenVirtualBlockDevice
 	{
-		$xenResponse = $this->xenConnection->__call('VBD__get_by_uuid', [$uuid]);
-		$refID       = $xenResponse->getValue();
+		$xenResponse = $this->xenConnection->call('VBD.get_by_uuid', [$uuid]);
+		$refID       = $xenResponse;
 
 		return new XenVirtualBlockDevice($this->xenConnection, $refID);
 	}
@@ -801,8 +822,8 @@ class Xen
 		];
 
 
-		$xenResponse = $this->xenConnection->__call('VIF__create', [$record]);
-		$refID       = $xenResponse->getValue();
+		$xenResponse = $this->xenConnection->call('VIF.create', [$record]);
+		$refID       = $xenResponse;
 		$vif         = new XenVirtualInterface($this->xenConnection, $refID);
 
 		//add ips
@@ -819,7 +840,7 @@ class Xen
 	 */
 	public function getAllVirtualInterfaces(): array
 	{
-		$refIDs = $this->xenConnection->__call('VIF__get_all')->getValue();
+		$refIDs = $this->xenConnection->call('VIF.get_all');
 		$vdis   = array();
 		foreach ($refIDs as $refID)
 		{
@@ -836,7 +857,7 @@ class Xen
 	 */
 	public function getAllVirtualInterfaceRecords(): array
 	{
-		$map      = $this->xenConnection->__call('VIF__get_all_records')->getValue();
+		$map      = $this->xenConnection->call('VIF.get_all_records');
 		$vifArray = array();
 
 		foreach ($map as $refID => $record)
@@ -857,8 +878,8 @@ class Xen
 	 */
 	public function getVirtualInterfaceByUUID(String $uuid): XenVirtualInterface
 	{
-		$xenResponse = $this->xenConnection->__call('VIF__get_by_uuid', [$uuid]);
-		$refID       = $xenResponse->getValue();
+		$xenResponse = $this->xenConnection->call('VIF.get_by_uuid', [$uuid]);
+		$refID       = $xenResponse;
 
 		return new XenVirtualInterface($this->xenConnection, $refID);
 	}
@@ -872,7 +893,7 @@ class Xen
 	 */
 	public function getAllPhysicalInterfaces(): array
 	{
-		$refIDs = $this->xenConnection->__call('PIF__get_all')->getValue();
+		$refIDs = $this->xenConnection->call('PIF.get_all');
 		$pifs   = array();
 		foreach ($refIDs as $refID)
 		{
@@ -889,7 +910,7 @@ class Xen
 	 */
 	public function getAllPhysicalInterfaceRecords(): array
 	{
-		$map      = $this->xenConnection->__call('PIF__get_all_records')->getValue();
+		$map      = $this->xenConnection->call('PIF.get_all_records');
 		$pifArray = array();
 
 		foreach ($map as $refID => $record)
@@ -910,8 +931,8 @@ class Xen
 	 */
 	public function getPhysicalInterfaceByUUID(String $uuid): XenPhysicalInterface
 	{
-		$xenResponse = $this->xenConnection->__call('PIF__get_by_uuid', [$uuid]);
-		$refID       = $xenResponse->getValue();
+		$xenResponse = $this->xenConnection->call('PIF.get_by_uuid', [$uuid]);
+		$refID       = $xenResponse;
 
 		return new XenPhysicalInterface($this->xenConnection, $refID);
 	}
@@ -928,7 +949,7 @@ class Xen
 	 */
 	public function introducePhysicalInterface(XenHost $host, string $MAC = '', string $device = '0', bool $managed = true): XenPhysicalInterface
 	{
-		$refID = $this->xenConnection->__call('PIF__introduce', [$host->getRefID(), $MAC, $device, $managed]);
+		$refID = $this->xenConnection->call('PIF.introduce', [$host->getRefID(), $MAC, $device, $managed]);
 
 		return new XenPhysicalInterface($this->xenConnection, $refID);
 	}
@@ -940,7 +961,7 @@ class Xen
 	 */
 	public function scanPhysicalInterface(XenHost $host)
 	{
-		$this->xenConnection->__call('PIF__scan', [$host->getRefID()]);
+		$this->xenConnection->call('PIF.scan', [$host->getRefID()]);
 	}
 
 

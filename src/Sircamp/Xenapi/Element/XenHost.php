@@ -89,7 +89,7 @@ class XenHost extends XenElement
 	 */
 	public function callExtension(String $call): string
 	{
-		return $this->call('call_extension', [$call])->getValue();
+		return $this->call('call_extension', [$call]);
 	}
 
 	/**
@@ -101,7 +101,7 @@ class XenHost extends XenElement
 	 */
 	public function callPlugin(String $plugin, String $fn, array $args = array()): string
 	{
-		return $this->call('call_plugin', [$plugin, $fn, $args])->getValue();
+		return $this->call('call_plugin', [$plugin, $fn, $args]);
 	}
 
 	/**
@@ -109,7 +109,7 @@ class XenHost extends XenElement
 	 */
 	public function computeFreeMemory(): int
 	{
-		return $this->call('compute_free_memory')->getValue();
+		return $this->call('compute_free_memory');
 	}
 
 	/**
@@ -117,7 +117,7 @@ class XenHost extends XenElement
 	 */
 	public function computeMemoryOverhead()
 	{
-		return $this->call('compute_memory_overhead')->getValue();
+		return $this->call('compute_memory_overhead');
 	}
 
 	/**
@@ -149,7 +149,7 @@ class XenHost extends XenElement
 	 */
 	public function disableDisplay()
 	{
-		return $this->call('disable_display')->getValue();
+		return $this->call('disable_display');
 	}
 
 	/**
@@ -173,7 +173,7 @@ class XenHost extends XenElement
 	 */
 	public function dmesg(): string
 	{
-		return $this->call('dmesg')->getValue();
+		return $this->call('dmesg');
 	}
 
 	/**
@@ -181,7 +181,7 @@ class XenHost extends XenElement
 	 */
 	public function dmesgClear(): string
 	{
-		return $this->call('dmesg_clear')->getValue();
+		return $this->call('dmesg_clear');
 	}
 
 	//TODO: implement emergency_ha_disable
@@ -200,7 +200,7 @@ class XenHost extends XenElement
 	public function enableDisplay()
 	{
 		//TODO: enum
-		return $this->call('enable_display')->getValue();
+		return $this->call('enable_display');
 	}
 
 	/**
@@ -727,7 +727,7 @@ class XenHost extends XenElement
 	 */
 	public function hasExtension(string $name): bool
 	{
-		return $this->call('has_extension', [$name])->getValue();
+		return $this->call('has_extension', [$name]);
 	}
 
 	/**
@@ -759,7 +759,7 @@ class XenHost extends XenElement
 //	{
 //		$xenResponse = $this->getXenConnection()->__call($this->callPrefix.'__list_methods');
 //		print_r($xenResponse);die();
-//		return $xenResponse->getValue();
+//		return $xenResponse;
 //	}
 
 
@@ -773,7 +773,7 @@ class XenHost extends XenElement
 	 */
 	public function migrateReceive(XenNetwork $xenNetwork, array $map = array()): array
 	{
-		return $this->call('migrateReceive', [$xenNetwork->getRefID(), $map])->getValue();
+		return $this->call('migrateReceive', [$xenNetwork->getRefID(), $map]);
 	}
 
 	/**
@@ -791,7 +791,7 @@ class XenHost extends XenElement
 	 */
 	public function queryDataSource(string $data_source): float
 	{
-		return $this->call('query_data_source', [$data_source])->getValue();
+		return $this->call('query_data_source', [$data_source]);
 	}
 
 	/**
@@ -871,7 +871,7 @@ class XenHost extends XenElement
 	 */
 	public function retrieveWLBEvacuateRecommendation(): array
 	{
-		return $this->call('retrieve_wlb_evacuate_recommendations')->getValue();
+		return $this->call('retrieve_wlb_evacuate_recommendations');
 	}
 
 	/**

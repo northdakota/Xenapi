@@ -1,6 +1,5 @@
 <?php namespace Sircamp\Xenapi\Element;
 
-use Respect\Validation\Validator;
 use Sircamp\Xenapi\Connection\XenConnection;
 use Sircamp\Xenapi\Exception\XenException;
 
@@ -11,6 +10,7 @@ abstract class XenElement
 	protected $xenConnection;
 	protected $refID;
 
+	protected $async = false;
 	protected $callPrefix;
 
 
@@ -22,14 +22,14 @@ abstract class XenElement
 	 */
 	function __construct(XenConnection $xenConnection, String $refID)
 	{
-		$this->_setXenconnection($xenConnection)->_setRefID($refID);
+		$this->_setXenConnection($xenConnection)->_setRefID($refID);
 	}
 
 	/**
 	 * @param String $name
 	 * @param array  $args
 	 *
-	 * @return \Sircamp\Xenapi\Connection\XenResponse
+	 * @return mixed
 	 * @throws XenException
 	 */
 	public function call(String $name, array $args = array())
@@ -37,17 +37,23 @@ abstract class XenElement
 		//Assign the refID of the VM
 		array_unshift($args, $this->getRefID());
 
-		$methodName = $this->callPrefix . '__' . $name;
-		$xenResponse = $this->getXenConnection()->__call($methodName, $args);
+		$methodName = $this->callPrefix . '.' . $name;
 
-		if (Validator::equals('Failure')->validate($xenResponse->getStatus()))
-		{
-			throw new XenException($xenResponse->getErrorDescription(), 1);
+		//Check if the request should be done asynchronos
+		if($this->async){
+			$methodName = "Async.".$methodName;
+			//TODO: return a task object
+			throw new XenException(["Not implemented yet!"], 1);
 		}
 
-		return $xenResponse;
+		return $this->getXenConnection()->call($methodName, $args);
 	}
 
+	/**
+	 * Assert something, this will throw an exception if the assert fails
+	 * @param string $name
+	 * @param array  $args
+	 */
 	public function assert(string $name, array $args=array())
 	{
 		$this->call('assert_'.$name, $args);
@@ -75,7 +81,7 @@ abstract class XenElement
 	 */
 	public function get(String $X)
 	{
-		return $this->call('get_'.$X)->getValue();
+		return $this->call('get_'.$X);
 	}
 
 	/**
@@ -126,7 +132,7 @@ abstract class XenElement
 	 *
 	 * @return self
 	 */
-	private function _setXenconnection($xenConnection)
+	private function _setXenConnection($xenConnection)
 	{
 		$this->xenConnection = $xenConnection;
 

@@ -30,7 +30,7 @@ class XenVirtualNetworkInterface extends XenElement
 
 	public function configureIPv6(string $mode, string $address, string $gateway)
 	{
-		$this->call('configure_ipv6', [$mode, $address, $gateway]);	
+		$this->call('configure_ipv6', [$mode, $address, $gateway]);
 	}
 
 	public function destroy()
@@ -39,9 +39,9 @@ class XenVirtualNetworkInterface extends XenElement
 	}
 
 	//TODO implement get messages
-	public function getMAC() : string
+	public function getMAC(): string
 	{
-		return $this->call('get_MAC')->getValue();
+		return $this->call('get_MAC');
 	}
 
 	public function move(XenNetwork $xenNetwork)

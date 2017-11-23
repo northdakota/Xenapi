@@ -36,7 +36,7 @@ class XenVirtualDiskImage extends XenElement
 
 	public function clone(array $driver_params = array()): XenVirtualDiskImage
 	{
-		$refID = $this->call('clone', [$driver_params])->getValue();
+		$refID = $this->call('clone', [$driver_params]);
 
 		return new XenVirtualDiskImage($this->xenConnection, $refID);
 	}
@@ -85,14 +85,14 @@ class XenVirtualDiskImage extends XenElement
 
 	public function getStorageRepository(): XenStorageRepository
 	{
-		$refID = $this->call('get_SR')->getValue();
+		$refID = $this->call('get_SR');
 
 		return new XenStorageRepository($this->xenConnection, $refID);
 	}
 
 	public function getVirtualBlockDevices(): array
 	{
-		$refIDs   = $this->call('get_VBDs')->getValue();
+		$refIDs   = $this->call('get_VBDs');
 		$vbdArray = array();
 		foreach ($refIDs as $refID)
 		{
@@ -107,21 +107,21 @@ class XenVirtualDiskImage extends XenElement
 
 	public function listChangedBlocks(XenVirtualDiskImage $vdi_to): string
 	{
-		return $this->call('list_changed_blocks', [$vdi_to])->getValue();
+		return $this->call('list_changed_blocks', [$vdi_to]);
 	}
 
 	//TODO implement open_database
 
 	public function poolMigrate(XenStorageRepository $sr, array $options = array()): XenVirtualDiskImage
 	{
-		$refID = $this->call('pool_migrate', [$sr, $options])->getValue();
+		$refID = $this->call('pool_migrate', [$sr, $options]);
 
 		return new XenVirtualDiskImage($this->xenConnection, $refID);
 	}
 
 	public function readDatabasePoolUUID(): string
 	{
-		return $this->call('read_database_pool_uuid')->getValue();
+		return $this->call('read_database_pool_uuid');
 	}
 
 	public function removeFromOtherConfig(string $key)
@@ -153,7 +153,7 @@ class XenVirtualDiskImage extends XenElement
 
 	public function snapshot(array $driver_params = array()): XenVirtualDiskImage
 	{
-		$refID = $this->call('snapshot', $driver_params)->getValue();
+		$refID = $this->call('snapshot', $driver_params);
 
 		return new XenVirtualDiskImage($this->xenConnection, $refID);
 	}

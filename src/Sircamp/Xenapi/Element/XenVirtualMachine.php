@@ -1,7 +1,5 @@
 <?php namespace Sircamp\Xenapi\Element;
 
-use GuzzleHttp\Client;
-use Respect\Validation\Validator;
 use Sircamp\Xenapi\Connection\XenResponse;
 use Sircamp\Xenapi\Exception\XenException;
 
@@ -168,7 +166,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function callPlugin(string $name, string $fn, array $args = array()): string
 	{
-		return $this->call('call_plugin', [$name, $fn, $args])->getValue();
+		return $this->call('call_plugin', [$name, $fn, $args]);
 	}
 
 	/**
@@ -181,7 +179,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function checkpoint(string $name): XenVirtualMachine
 	{
-		$refID = $this->call('checkpoint', $name)->getValue();
+		$refID = $this->call('checkpoint', $name);
 
 		return new XenVirtualMachine($this->getXenConnection(), $refID);
 	}
@@ -225,7 +223,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function clone(string $name): XenVirtualMachine
 	{
-		$refID = $this->call('clone', [$name])->getValue();
+		$refID = $this->call('clone', [$name]);
 
 		return new XenVirtualMachine($this->getXenConnection(), $refID);
 	}
@@ -237,7 +235,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function computeMemoryOverhead(): int
 	{
-		return $this->call('compute_memory_overhead')->getValue();
+		return $this->call('compute_memory_overhead');
 	}
 
 	/**
@@ -259,7 +257,7 @@ class XenVirtualMachine extends XenElement
 			$refID = $xenStorageRepository->getRefID();
 		}
 
-		$vmRefID = $this->call('copy', [$name, $refID])->getValue();
+		$vmRefID = $this->call('copy', [$name, $refID]);
 
 		return new XenVirtualMachine($this->xenConnection, $vmRefID);
 	}
@@ -637,7 +635,7 @@ class XenVirtualMachine extends XenElement
 
 	public function import($url, XenStorageRepository $xenStorageRepository, bool $full_restore, bool $force)
 	{
-		$refIDs  = $this->call('import', [$url, $xenStorageRepository->getRefID(), $full_restore, $force])->getValue();
+		$refIDs  = $this->call('import', [$url, $xenStorageRepository->getRefID(), $full_restore, $force]);
 		$vmArray = array();
 
 		foreach ($refIDs as $refID)
@@ -655,13 +653,13 @@ class XenVirtualMachine extends XenElement
 
 	public function maximiseMemory(int $total, bool $approximate)
 	{
-		return $this->call('maximiseMemory', [$total, $approximate])->getValue();
+		return $this->call('maximiseMemory', [$total, $approximate]);
 	}
 
 	//TODO: implement migrate_send
 	public function migrateSend(array $dest, bool $live, array $vdi_map, array $vif_map, array $options, array $vgpu_map)
 	{
-		$refID = $this->call('migrate_send', [$dest, $live, $vdi_map, $vif_map, $options, $vgpu_map])->getValue();
+		$refID = $this->call('migrate_send', [$dest, $live, $vdi_map, $vif_map, $options, $vgpu_map]);
 
 		return new XenVirtualMachine($this->getXenConnection(), $refID);
 	}
@@ -689,12 +687,12 @@ class XenVirtualMachine extends XenElement
 
 	public function queryDataSource(string $data_source): float
 	{
-		return $this->call('query_data_source', [$data_source])->getValue();
+		return $this->call('query_data_source', [$data_source]);
 	}
 
 	public function queryServices(): array
 	{
-		return $this->call('query_services')->getValue();
+		return $this->call('query_services');
 	}
 
 	public function recordDataSource(string $data_source)
@@ -970,14 +968,14 @@ class XenVirtualMachine extends XenElement
 
 	public function snapshot(string $name): XenVirtualMachine
 	{
-		$refID = $this->call('snapshot', [$name])->getValue();
+		$refID = $this->call('snapshot', [$name]);
 
 		return new XenVirtualMachine($this->getXenConnection(), $refID);
 	}
 
 	public function snapshotWithQuiesce(string $name): XenVirtualMachine
 	{
-		$refID = $this->call('snapshot_with_quiesce', [$name])->getValue();
+		$refID = $this->call('snapshot_with_quiesce', [$name]);
 
 		return new XenVirtualMachine($this->getXenConnection(), $refID);
 	}

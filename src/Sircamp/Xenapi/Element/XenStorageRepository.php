@@ -12,7 +12,7 @@ class XenStorageRepository extends XenElement
 {
 
 	protected $callPrefix = "SR";
-	
+
 	//TODO: implement add messages
 	//TODO: implement add_to messages
 	//TODO: implement assert messages
@@ -61,7 +61,7 @@ class XenStorageRepository extends XenElement
 
 	public function removeTags(string $value)
 	{
-		$this->call('remove_tags',[$value]);
+		$this->call('remove_tags', [$value]);
 	}
 
 	public function scan()

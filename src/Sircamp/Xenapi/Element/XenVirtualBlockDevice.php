@@ -220,7 +220,7 @@ class XenVirtualBlockDevice extends XenElement
 	/**
 	 * @return bool
 	 */
-	public function getUnpluggable():bool
+	public function getUnpluggable(): bool
 	{
 		return $this->get('unpluggable');
 	}

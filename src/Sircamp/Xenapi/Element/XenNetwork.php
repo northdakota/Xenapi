@@ -10,12 +10,13 @@ class XenNetwork extends XenElement
 	{
 		$this->call('add_tags', [$tags]);
 	}
-	
+
 	//TODO: implement add_to message
 
 	public function create(array $network_record)
 	{
-		$refID = $this->call('create', [$network_record])->getValue();
+		$refID = $this->call('create', [$network_record]);
+
 		return new XenNetwork($this->getXenConnection(), $refID);
 	}
 
@@ -29,7 +30,7 @@ class XenNetwork extends XenElement
 	//TODO: implement get messages
 	public function getTags(): array
 	{
-		return $this->call('get_tags')->getValue();
+		return $this->call('get_tags');
 	}
 
 	//TODO implement remove from messages
