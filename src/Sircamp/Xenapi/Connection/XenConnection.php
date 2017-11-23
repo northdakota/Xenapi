@@ -254,7 +254,7 @@ class XenConnection
 				}
 				else
 				{
-					throw new XenException($response['ErrorDescription'], 1);
+					return new XenResponse($response);
 				}
 			}
 		}
@@ -307,7 +307,6 @@ class XenConnection
 		$rpcMethod   = $this->xenRPC_method($name, $args);
 		$response    = $this->xenRPC_request($this->getUrl(), $rpcMethod);
 		$xenResponse = $this->xenRPC_parse_response($response);
-
 		if (XenConnection::$debug)
 		{
 			//Debug messages
