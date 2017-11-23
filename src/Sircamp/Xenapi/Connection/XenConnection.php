@@ -310,10 +310,10 @@ class XenConnection
 		if(XenConnection::$debug){
 			//Debug messages
 			echo "Called: ".$name;
-			echo " Value: ".$xenResponse->getValue();
-			echo " Status: ".$xenResponse->getStatus();
+			echo " Value: ".json_encode($xenResponse->getValue());
+			echo " Status: ".json_encode($xenResponse->getStatus());
 			if(!empty($xenResponse->getErrorDescription())){
-				echo " Error: ".print_r($xenResponse->getErrorDescription(), true)."\n";
+				echo " Error: ".json_encode($xenResponse->getErrorDescription(), true)."\n";
 			}else{
 				echo "\n";
 			}
