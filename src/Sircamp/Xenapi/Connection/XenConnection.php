@@ -14,6 +14,8 @@ class XenConnection
 	private $user;
 	private $password;
 
+	public static $debug = false;
+
 	function __construct()
 	{
 		$this->session_id = null;
@@ -304,6 +306,18 @@ class XenConnection
 		$rpcMethod   = $this->xenRPC_method($name, $args);
 		$response     = $this->xenRPC_request($this->getUrl(), $rpcMethod);
 		$xenResponse = $this->xenRPC_parse_response($response);
+
+		if(XenConnection::$debug){
+			//Debug messages
+			echo "Called: ".$name;
+			echo " Value: ".$xenResponse->getValue();
+			echo " Status: ".$xenResponse->getStatus();
+			if(!empty($xenResponse->getErrorDescription())){
+				echo " Error: ".print_r($xenResponse->getErrorDescription(), true)."\n";
+			}else{
+				echo "\n";
+			}
+		}
 
 		//Test if the request was successful
 		if (Validator::equals('Failure')->validate($xenResponse->getStatus()))

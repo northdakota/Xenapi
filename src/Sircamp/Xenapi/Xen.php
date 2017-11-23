@@ -91,6 +91,16 @@ class Xen
 		return $this->xenConnection;
 	}
 
+
+	public function enableDebug()
+	{
+		XenConnection::$debug = true;
+	}
+
+	public function disableDebug()
+	{
+		XenConnection::$debug = false;
+	}
 	//VirtualMachine
 //	/**
 //	 * NOT RECOMMENDED and not implemented use $vm->clone or $vm->copy
