@@ -6,6 +6,7 @@ use Sircamp\Xenapi\Connection\XenResponse;
 use Sircamp\Xenapi\Element\XenHost;
 use Sircamp\Xenapi\Element\XenNetwork;
 use Sircamp\Xenapi\Element\XenPhysicalInterface;
+use Sircamp\Xenapi\Element\XenPool;
 use Sircamp\Xenapi\Element\XenStorageRepository;
 use Sircamp\Xenapi\Element\XenVirtualBlockDevice;
 use Sircamp\Xenapi\Element\XenVirtualDiskImage;
@@ -76,7 +77,7 @@ class Xen
 	 *
 	 * @return XenResponse
 	 */
-	public function __call(string $name, array $args = array()) : XenResponse
+	public function __call(string $name, array $args = array()): XenResponse
 	{
 		return $this->getXenConnection()->__call($name, $args);
 	}
@@ -94,7 +95,7 @@ class Xen
 
 	public function enableDebug(string $filename)
 	{
-		XenConnection::$debug = true;
+		XenConnection::$debug      = true;
 		XenConnection::$debug_file = $filename;
 	}
 
@@ -975,6 +976,464 @@ class Xen
 		$this->xenConnection->call('PIF.scan', [$host->getRefID()]);
 	}
 
+
+	//XenPool
+
+	/**
+	 * Install an SSL certificate pool-wide.
+	 *
+	 * @param string $name A name to give the certificate
+	 * @param string $cert The certificate
+	 */
+	public function certificateInstall(string $name, string $cert)
+	{
+		$this->xenConnection->call('pool.certificate_install', [$name, $cert]);
+	}
+
+	/**
+	 * List all installed SSL certificates.
+	 *
+	 * @return array
+	 */
+	public function certificateList(): array
+	{
+		return $this->xenConnection->call('pool.certificate_list');
+	}
+
+	/**
+	 * Sync SSL certificates from master to slaves
+	 */
+	public function certificateSync()
+	{
+		$this->xenConnection->call('pool.certificate_sync');
+	}
+
+	/**
+	 * Remove an SSL certificate.
+	 *
+	 * @param string $name The certificate name
+	 */
+	public function certificateUninstall(string $name)
+	{
+		$this->xenConnection->call('pool.certificate_uninstall', [$name]);
+	}
+
+	/**
+	 * Create PIFs, mapping a network to the same physical interface/VLAN on each host.
+	 * This call is deprecated: use Pool.create_VLAN_from_PIF instead.
+	 *
+	 * @param string     $device  Physical interface on which to create the VLAN
+	 * @param XenNetwork $network Network to which this interface should be connected
+	 * @param int        $tag     VLAN tag for the new interface
+	 *
+	 * @return array
+	 */
+	public function createVLAN(string $device, XenNetwork $network, int $tag): array
+	{
+		$refIDs   = $this->xenConnection->call('pool.create_VLAN', [$device, $network->getRefID(), $tag]);
+		$pifArray = array();
+
+		foreach ($refIDs as $refID)
+		{
+			$pifArray[] = new XenPhysicalInterface($this->xenConnection, $refID);
+		}
+
+		return $pifArray;
+	}
+
+	/**
+	 * Create a pool-wide VLAN by taking the PIF.
+	 *
+	 * @param XenPhysicalInterface $pif     Physical interface an any particular host that identifies the PIF on which to create the (pool-wide) VLAND interface
+	 * @param XenNetwork           $network Network to which this interface should be connected
+	 * @param int                  $tag     VLAN tag for the new interface
+	 *
+	 * @return array
+	 */
+	public function createVLANFromPhysicalInterface(XenPhysicalInterface $pif, XenNetwork $network, int $tag)
+	{
+		$refIDs   = $this->xenConnection->call('pool.create_VLAN_from_PIF', [$pif->getRefID(), $network->getRefID(), $tag]);
+		$pifArray = array();
+
+		foreach ($refIDs as $refID)
+		{
+			$pifArray[] = new XenPhysicalInterface($this->xenConnection, $refID);
+		}
+
+		return $pifArray;
+	}
+
+	/**
+	 * Install an SSL certificate revocation list, pool-wide.
+	 *
+	 * @param string $name A name to give the CRL
+	 * @param string $cert The CRL
+	 */
+	public function crlInstall(string $name, string $cert)
+	{
+		$this->xenConnection->call('pool.crl_install', [$name, $cert]);
+	}
+
+	/**
+	 * List all installed SSL certificate revocation lists.
+	 *
+	 * @return mixed
+	 */
+	public function crlList()
+	{
+		return $this->xenConnection->call('pool.crl_list');
+	}
+
+	/**
+	 * Remove an SSL certificate revocation list.
+	 *
+	 * @param string $name The CRL name
+	 */
+	public function crlUninstall(string $name)
+	{
+		$this->xenConnection->call('pool.crl_uninstall', [$name]);
+	}
+
+	/**
+	 * Permanently deconfigures workload balancing monitoring on this pool
+	 */
+	public function deconfigureWLB()
+	{
+		$this->xenConnection->call('pool.deconfigure_wlb');
+	}
+
+	/**
+	 * Perform an orderly handover of the role of master to the referenced host.
+	 *
+	 * @param XenHost $host The host who should become the new master
+	 */
+	public function designateNewMaster(XenHost $host)
+	{
+		$this->xenConnection->call('pool.designate_new_master', [$host->getRefID()]);
+	}
+
+	/**
+	 * Turn off High Availability mode
+	 */
+	public function disableHA()
+	{
+		$this->xenConnection->call('pool.disable_ha');
+	}
+
+	/**
+	 * Disable the redo log if in use, unless HA is enabled.
+	 */
+	public function disableRedoLog()
+	{
+		$this->xenConnection->call('pool.disable_redo_log');
+	}
+
+	/**
+	 * Instruct a pool master to eject a host from the pool
+	 *
+	 * @param XenHost $host The host to eject
+	 */
+	public function eject(XenHost $host)
+	{
+		$this->xenConnection->call('pool.eject', [$host->getRefID()]);
+	}
+
+	/**
+	 * Instruct a slave already in a pool that the master has changed
+	 *
+	 * @param string $master The hostname of the master
+	 */
+	public function emergencyResetMaster(string $master)
+	{
+		$this->xenConnection->call('pool.emergency_reset_master', [$master]);
+	}
+
+	/**
+	 * Instruct host that's currently a slave to transition to being master
+	 */
+	public function emergencyTransitionToMaster()
+	{
+		$this->xenConnection->call('pool.emergency_transition_to_master');
+	}
+
+	/**
+	 * Turn on High Availability mode
+	 *
+	 * @param array $heartbeat_srs Set of SRs to use for storage heartbeating
+	 * @param array $config        Detailed HA configuration to apply
+	 */
+	public function enableHA(array $heartbeat_srs, array $config)
+	{
+		$refIDs = array();
+		foreach ($heartbeat_srs as $sr)
+		{
+			$refIDs[] = $sr->getRefID();
+		}
+
+		$this->xenConnection->call('pool.enable_ha', [$refIDs, $config]);
+	}
+
+	/**
+	 * Enable the redo log on the given SR and start using it, unless HA is enabled.
+	 *
+	 * @param XenStorageRepository $sr SR to hold the redo log.
+	 */
+	public function enableRedoLog(XenStorageRepository $sr)
+	{
+		$this->xenConnection->call('pool.enable_redo_log', [$sr->getRefID()]);
+	}
+
+	/**
+	 * Return a list of all the pools known to the system.
+	 *
+	 * @return array
+	 */
+	public function getAllPools(): array
+	{
+		$refIDs = $this->xenConnection->call('pool.get_all');
+		$pools  = array();
+		foreach ($refIDs as $refID)
+		{
+			$pools[] = new XenPool($this->xenConnection, $refID);
+		}
+
+		return $pools;
+	}
+
+	/**
+	 * Return a array with pools and pool records for all pools known to the system.
+	 *
+	 * @return array With the Form: [0 => ['pool' => vdi_object, 'record'=> record_array]]
+	 */
+	public function getAllPoolRecords(): array
+	{
+		$map       = $this->xenConnection->call('pool.get_all_records');
+		$poolArray = array();
+
+		foreach ($map as $refID => $record)
+		{
+			$pool        = new XenPool($this->xenConnection, $refID);
+			$poolArray[] = ['pool' => $pool, 'record' => $record];
+		}
+
+		return $poolArray;
+	}
+
+	/**
+	 * Get a reference to the pool instance with the specified UUID.
+	 *
+	 * @param String $uuid
+	 *
+	 * @return XenPool
+	 */
+	public function getPoolByUUID(String $uuid): XenPool
+	{
+		$xenResponse = $this->xenConnection->call('pool.get_by_uuid', [$uuid]);
+		$refID       = $xenResponse;
+
+		return new XenPool($this->xenConnection, $refID);
+	}
+
+	/**
+	 * Returns the maximum number of host failures we could tolerate before we would be unable to restart the provided VMs
+	 *
+	 * @param array $config Map of protected VM reference to restart priority
+	 *
+	 * @return int              maximum value for ha_host_failures_to_tolerate given provided configuration
+	 */
+	public function haComputeHypotheticalMaxHostFailuresToTolerate(array $config): int
+	{
+		return $this->xenConnection->call('pool.ha_compute_hypothetical_max_host_failures_to_tolerate', [$config]);
+	}
+
+	/**
+	 * Returns the maximum number of host failures we could tolerate before we would be unable to restart the provided VMs
+	 *
+	 * @return int            maximum value for ha_host_failures_to_tolerate given current configuration
+	 */
+	public function haComputeMaxHostFailuresToTolerate(): int
+	{
+		return $this->xenConnection->call('pool.ha_compute_max_host_failures_to_tolerate', []);
+	}
+
+	/**
+	 * Return a VM failover plan assuming a given subset of hosts fail
+	 *
+	 * @param array $failed_hosts The array of hosts to assume have failed
+	 * @param array $failed_VMs   The array of VMs to restart
+	 *
+	 * @return array                VM failover plan: a map of VM to host to restart the host on: [ ['vm' => XenVirtualMachine object, 'map' => [] ] ]
+	 */
+	public function haComputeVMFailoverPlan(array $failed_hosts, array $failed_VMs): array
+	{
+		$hostArr = array();
+		$vmArr   = array();
+
+		foreach ($failed_hosts as $host)
+		{
+			$hostArr[] = $host->getRefID();
+		}
+
+		foreach ($failed_VMs as $vm)
+		{
+			$vmArr[] = $vm->getRefID();
+		}
+
+		$failPlan = $this->xenConnection->call('pool.ha_compute_vm_failover_plan', [$failed_hosts, $failed_VMs]);
+		$retArr   = array();
+		foreach ($failPlan as $vm => $value)
+		{
+			$retArr[] = [
+				'vm'  => new XenVirtualMachine($this->xenConnection, $vm),
+				'map' => $value,
+			];
+		}
+
+		return $retArr;
+	}
+
+	/**
+	 * Returns true if a VM failover plan exists for up to 'n' host failures
+	 *
+	 * @param int $n The number of host failures to plan for
+	 *
+	 * @return bool
+	 */
+	public function haFailoverPlanExists(int $n): bool
+	{
+		return $this->xenConnection->call('pool.ha_failover_plan_exists', [$n]);
+	}
+
+	/**
+	 * When this call returns the VM restart logic will not run for the requested number of seconds.
+	 * If the argument is zero then the restart thread is immediately unblocked
+	 *
+	 * @param int $seconds
+	 */
+	public function haPreventRestartsFor(int $seconds)
+	{
+		$this->xenConnection->call('pool.ha_prevent_restarts_for', [$seconds]);
+	}
+
+	/**
+	 * Initializes workload balancing monitoring on this pool with the specified wlb server
+	 *
+	 * @param string $wlb_url            The ip address and port to use when accessing the wlb server
+	 * @param string $wlb_username       The username used to authenticate with the wlb server
+	 * @param string $wlb_password       The password used to authenticate with the wlb server
+	 * @param string $xenserver_username The username used by the wlb server to authenticate with the xenserver
+	 * @param string $xenserver_password The password used by the wlb server to authenticate with the xenserver
+	 */
+	public function initializeWLB(string $wlb_url, string $wlb_username, string $wlb_password, string $xenserver_username, string $xenserver_password)
+	{
+		$this->xenConnection->call('pool.initialize_wlb', [$wlb_url, $wlb_username, $wlb_password, $xenserver_username, $xenserver_password]);
+	}
+
+	/**
+	 * Instruct host to join a new pool
+	 *
+	 * @param string $master_address  The hostname of the master of the pool to join
+	 * @param string $master_username The username of the master (for initial authentication)
+	 * @param string $master_password The password for the master (for initial authentication)
+	 */
+	public function join(string $master_address, string $master_username, string $master_password)
+	{
+		$this->xenConnection->call('pool.join', [$master_address, $master_username, $master_password]);
+	}
+
+	/**
+	 * Instruct host to join a new pool
+	 *
+	 * @param string $master_address  The hostname of the master of the pool to join
+	 * @param string $master_username The username of the master (for initial authentication)
+	 * @param string $master_password The password for the master (for initial authentication)
+	 */
+	public function joinForce(string $master_address, string $master_username, string $master_password)
+	{
+		$this->xenConnection->call('pool.join', [$master_address, $master_username, $master_password]);
+	}
+
+	/**
+	 * Reconfigure the management network interface for all Hosts in the Pool
+	 *
+	 * @param XenNetwork $network The network
+	 */
+	public function managementReconfigure(XenNetwork $network)
+	{
+		$this->xenConnection->call('pool.management_reconfigure', [$network->getRefID()]);
+	}
+
+	/**
+	 * Instruct a pool master, M, to try and contact its slaves and, if slaves are in emergency mode, reset their master address to M.
+	 *
+	 * @return array        list of hosts whose master address were successfully reset
+	 */
+	public function recoverSlaves(): array
+	{
+		$refIDs  = $this->xenConnection->call('pool.recover_slaves');
+		$hostArr = array();
+
+		foreach ($refIDs as $refID)
+		{
+			$hostArr[] = new XenHost($this->xenConnection, $refID);
+		}
+
+		return $hostArr;
+	}
+
+	/**
+	 * Retrieves the pool optimization criteria from the workload balancing server
+	 *
+	 * @return array
+	 */
+	public function retrieveWLBConfiguration(): array
+	{
+		return $this->xenConnection->call('pool.retrieve_wlb_configuration');
+	}
+
+	/**
+	 * Retrieves vm migrate recommendations for the pool from the workload balancing server
+	 *
+	 * @return array
+	 */
+	public function retrieveWLBRecommendations(): array
+	{
+		return $this->xenConnection->call('pool.retrieve_wlb_recommendations');
+	}
+
+
+	/**
+	 * Send the given body to the given host and port, using HTTPS, and print the response.
+	 * This is used for debugging the SSL layer.
+	 *
+	 * @param string $host
+	 * @param int    $port
+	 * @param string $body
+	 *
+	 * @return string
+	 */
+	public function sendTestPost(string $host, int $port, string $body): string
+	{
+		return $this->xenConnection->call('pool.send_test_post', [$host, $port, $body]);
+	}
+
+	/**
+	 * Sets the pool optimization criteria for the workload balancing server
+	 *
+	 * @param array $config
+	 */
+	public function sendWLBConfiguration(array $config)
+	{
+		$this->xenConnection->call('pool.send_wlb_configuration', [$config]);
+	}
+
+	/**
+	 * Forcibly synchronise the database now
+	 */
+	public function syncDatabase()
+	{
+		$this->xenConnection->call('pool.sync_database');
+	}
 
 }
 
