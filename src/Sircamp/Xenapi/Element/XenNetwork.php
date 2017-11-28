@@ -30,7 +30,7 @@ class XenNetwork extends XenElement
 	//TODO: implement get messages
 	public function getTags(): array
 	{
-		return $this->call('get_tags');
+		return $this->get('tags');
 	}
 
 	//TODO implement remove from messages

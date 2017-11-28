@@ -65,7 +65,7 @@ class XenPool extends XenElement
 
 	public function getAllowedOperations():array
 	{
-		return $this->call('get_allowed_operations');
+		return $this->get('allowed_operations');
 	}
 
 	public function getCPUInfo(): array

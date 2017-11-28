@@ -41,7 +41,7 @@ class XenVirtualNetworkInterface extends XenElement
 	//TODO implement get messages
 	public function getMAC(): string
 	{
-		return $this->call('get_MAC');
+		return $this->get('MAC');
 	}
 
 	public function move(XenNetwork $xenNetwork)

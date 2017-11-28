@@ -64,7 +64,7 @@ class XenVirtualBlockDevice extends XenElement
 	 */
 	public function getVDI(): XenVirtualDiskImage
 	{
-		$refID = $this->call('get_VDI')->getValue();
+		$refID = $this->get('VDI')->getValue();
 
 		return new XenVirtualDiskImage($this->xenConnection, $refID);
 	}
@@ -74,7 +74,7 @@ class XenVirtualBlockDevice extends XenElement
 	 */
 	public function getVM(): XenVirtualMachine
 	{
-		$refID = $this->call('get_VM')->getValue();
+		$refID = $this->get('VM')->getValue();
 
 		return new XenVirtualMachine($this->getXenConnection(), $refID);
 	}

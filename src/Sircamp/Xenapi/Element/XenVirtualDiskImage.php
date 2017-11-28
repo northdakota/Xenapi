@@ -85,14 +85,14 @@ class XenVirtualDiskImage extends XenElement
 
 	public function getStorageRepository(): XenStorageRepository
 	{
-		$refID = $this->call('get_SR');
+		$refID = $this->get('SR');
 
 		return new XenStorageRepository($this->xenConnection, $refID);
 	}
 
 	public function getVirtualBlockDevices(): array
 	{
-		$refIDs   = $this->call('get_VBDs');
+		$refIDs   = $this->get('VBDs');
 		$vbdArray = array();
 		foreach ($refIDs as $refID)
 		{
