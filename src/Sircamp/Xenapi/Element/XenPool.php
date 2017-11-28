@@ -124,7 +124,7 @@ class XenPool extends XenElement
 	    return $this->get('ha_hist_failures_to_tolerate');
 	}
 	
-	public function getHACvercommited(): bool
+	public function getHAOvercommited(): bool
 	{
 	    return $this->get('ha_overcommited');
 	}
@@ -189,7 +189,7 @@ class XenPool extends XenElement
 	    return $this->get('record');
 	}
 	
-	public function getRedoLogRnabled(): bool
+	public function getRedoLogEnabled(): bool
 	{
 	    return $this->get('redo_log_enabled');
 	}
@@ -219,7 +219,7 @@ class XenPool extends XenElement
 	    return $this->get('uuid');
 	}
 
-	public function getWLBEnabled(): boole
+	public function getWLBEnabled(): bool
 	{
 	    return $this->get('wlb_enabled');
 	}
@@ -239,13 +239,10 @@ class XenPool extends XenElement
 	    return $this->get('wlb_verify_cert');
 	}
 
-	//TODO HA messages
-
 	public function hasExtensions(string $name) : bool
 	{
 	    return $this->call('has_extensions', [$name]);
 	}
-
 
 	public function removeFromGuestAgentConfig(string $key)
 	{
