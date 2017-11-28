@@ -66,12 +66,12 @@ class XenVirtualNetworkInterface extends XenElement
 
 	public function setIPv4Allowed(array $ips)
 	{
-		$this->call('set_ipv4_allowed', [$ips]);
+		$this->set('ipv4_allowed', $ips);
 	}
 
 	public function setIPv6Allowed(array $ips)
 	{
-		$this->call('set_ipv6_allowed', [$ips]);
+		$this->set('ipv6_allowed', $ips);
 	}
 
 	//TODO: implement set messages

@@ -64,7 +64,7 @@ class XenVirtualLAN extends XenElement
 
 	public function setOtherConfig(array $config)
 	{
-		$this->call('set_other_config', [$config]);
+		$this->set('other_config', $config);
 	}
 
 }

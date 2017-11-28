@@ -73,7 +73,7 @@ class XenStorageRepository extends XenElement
 
 	public function setTags(array $tags)
 	{
-		$this->call('set_tags', [$tags]);
+		$this->set('tags', $tags);
 	}
 
 	public function update()

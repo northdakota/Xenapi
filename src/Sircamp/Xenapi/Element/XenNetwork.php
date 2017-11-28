@@ -49,7 +49,7 @@ class XenNetwork extends XenElement
 
 	public function setTags(array $tags = array())
 	{
-		$this->call('set_tags', [$tags]);
+		$this->set('tags', $tags);
 	}
 }
 

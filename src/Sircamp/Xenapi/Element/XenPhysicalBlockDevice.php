@@ -72,12 +72,12 @@ class XenPhysicalBlockDevice extends XenElement
 
 	public function setDeviceConfig(array $config)
 	{
-		$this->call('set_device_config', [$config]);
+		$this->set('device_config', $config);
 	}
 
 	public function setOtherConfig(array $config)
 	{
-		$this->call('set_other_config', [$config]);
+		$this->set('other_config', $config);
 	}
 
 	public function unplug()
