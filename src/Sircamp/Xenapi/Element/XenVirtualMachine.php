@@ -320,7 +320,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function getVirtualBlockDevices(): array
 	{
-		$refIDs    = $this->get('get_VBDs');
+		$refIDs    = $this->get('VBDs');
 		$vbdsArray = array();
 		foreach ($refIDs as $refID)
 		{
@@ -337,7 +337,7 @@ class XenVirtualMachine extends XenElement
 	 */
 	public function getVirtualInterfaces(): array
 	{
-		$refIDs    = $this->get('get_VIFs');
+		$refIDs    = $this->get('VIFs');
 		$vifsArray = array();
 		foreach ($refIDs as $refID)
 		{
