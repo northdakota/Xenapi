@@ -20,8 +20,8 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "respect/validation": "^1.1",
-        "guzzlehttp/guzzle": "^6.3"
+        "respect/validation": "*",
+        "guzzlehttp/guzzle": "*"
     },
     "autoload": {
         "psr-0": {
