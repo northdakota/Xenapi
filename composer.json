@@ -24,7 +24,7 @@
         "guzzlehttp/guzzle": "^6.3"
     },
     "autoload": {
-        "psr-0": {
+        "psr-4": {
             "Sircamp\\Xenapi\\": "src/Sircamp/Xenapi/"
         }
     },
